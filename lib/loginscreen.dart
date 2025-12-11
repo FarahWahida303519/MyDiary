@@ -273,7 +273,7 @@ class _LoginScreenState extends State<LoginScreen>
     if (passwordController.text == password) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const SplashScreen()),
+        MaterialPageRoute(builder: (_) => const MainScreen()),
       );
     } else {
       showMessage("Wrong PIN!");

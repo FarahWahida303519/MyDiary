@@ -1,6 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:mydiary/loginscreen.dart';
+import 'package:mydiary/mainscreen.dart';
+import 'package:mydiary/registerscreen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -23,6 +25,10 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
+// ----------------------------------------------------------------------
+//  SPLASH SCREEN
+// ----------------------------------------------------------------------
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -51,11 +57,11 @@ class _SplashScreenState extends State<SplashScreen>
 
     _controller.forward();
 
-    Future.delayed(const Duration(seconds: 4), () {
+    Future.delayed(const Duration(seconds: 3), () {
       if (mounted) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => const LoginScreen()),
+          MaterialPageRoute(builder: (_) => const AskPasswordScreen()),
         );
       }
     });
@@ -74,7 +80,7 @@ class _SplashScreenState extends State<SplashScreen>
     return Scaffold(
       body: Stack(
         children: [
-          // 🌸 Soft Pink Background
+          // Background gradient
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -89,7 +95,7 @@ class _SplashScreenState extends State<SplashScreen>
             ),
           ),
 
-          // 🌬 Soft Blur Layer
+          // Blur effect
           Positioned.fill(
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
@@ -97,24 +103,24 @@ class _SplashScreenState extends State<SplashScreen>
             ),
           ),
 
-          // ✨ Main Content
+          // Fade-in content
           Center(
             child: FadeTransition(
               opacity: _fadeAnimation,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // ⭐ Updated Soft Circle Icon (matches login design)
+                  // Logo circle
                   Container(
                     height: screenHeight * 0.20,
                     width: screenHeight * 0.20,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-
-                      // ✔ Pastel soft pink background
                       color: const Color(0xFFFFF1F5),
-
-                      // ✔ Soft floating shadow
+                      border: Border.all(
+                        color: Colors.white.withOpacity(0.8),
+                        width: 2,
+                      ),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.pink.shade100.withOpacity(0.4),
@@ -122,14 +128,7 @@ class _SplashScreenState extends State<SplashScreen>
                           offset: const Offset(0, 8),
                         ),
                       ],
-
-                      // ✔ Soft white border for elegant glow
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.8),
-                        width: 1.8,
-                      ),
                     ),
-
                     child: Icon(
                       Icons.menu_book_rounded,
                       size: 85,
@@ -139,20 +138,17 @@ class _SplashScreenState extends State<SplashScreen>
 
                   const SizedBox(height: 35),
 
-                  // App Title
                   Text(
                     "MyDiary",
                     style: TextStyle(
                       fontSize: 34,
                       fontWeight: FontWeight.w800,
                       color: Colors.pink.shade700,
-                      letterSpacing: 1.2,
                     ),
                   ),
 
                   const SizedBox(height: 10),
 
-                  // Subtitle
                   Text(
                     "Your stories. Your space.",
                     style: TextStyle(
@@ -163,22 +159,103 @@ class _SplashScreenState extends State<SplashScreen>
 
                   const SizedBox(height: 35),
 
-                  // Loader
-                  SizedBox(
-                    height: 36,
-                    width: 36,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 3,
-                      valueColor: AlwaysStoppedAnimation(
-                        Colors.pink.shade400,
-                      ),
-                    ),
+                  const CircularProgressIndicator(
+                    strokeWidth: 3,
+                    color: Colors.pink,
                   ),
                 ],
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ----------------------------------------------------------------------
+//  ASK PASSWORD SCREEN (NEW)
+// ----------------------------------------------------------------------
+
+class AskPasswordScreen extends StatelessWidget {
+  const AskPasswordScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFFFF5F8),
+      body: Center(
+        child: Container(
+          padding: const EdgeInsets.all(25),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.pink.shade100.withOpacity(0.3),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                "Do you want to set a password?",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFFB03A75),
+                ),
+                textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: 25),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // YES → Go to RegisterScreen
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFB03A75),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 22, vertical: 12),
+                    ),
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (_) => const RegisterScreen()),
+                      );
+                    },
+                    child: const Text("YES"),
+                  ),
+
+                  const SizedBox(width: 20),
+
+                  // NO → Go to MainScreen
+                  OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Color(0xFFB03A75)),
+                      foregroundColor: const Color(0xFFB03A75),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 22, vertical: 12),
+                    ),
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (_) => const MainScreen()),
+                      );
+                    },
+                    child: const Text("NO"),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
