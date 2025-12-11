@@ -11,6 +11,7 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen>
     with SingleTickerProviderStateMixin {
+
   TextEditingController passwordController = TextEditingController();
   bool passwordVisible = false;
 
@@ -21,16 +22,14 @@ class _RegisterScreenState extends State<RegisterScreen>
   void initState() {
     super.initState();
 
-    // Smooth fade-in animation
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 900),
     );
 
-    _fadeIn = Tween<double>(
-      begin: 0,
-      end: 1,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+    _fadeIn = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
 
     _controller.forward();
   }
@@ -41,42 +40,49 @@ class _RegisterScreenState extends State<RegisterScreen>
     super.dispose();
   }
 
-  // -------------------------------------------
-  // MAIN UI
-  // -------------------------------------------
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
+    final width = MediaQuery.of(context).size.width;
 
     return Scaffold(
       body: Container(
+        width: double.infinity,
+        height: double.infinity,
+
+        // 🌸 Pastel Pink Gradient
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF8E3B8E), Color(0xFF6A1B9A)],
+            colors: [
+              Color(0xFFFDE2F3),
+              Color(0xFFF7D4EC),
+              Color(0xFFEEC7E7),
+            ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
         ),
-        width: double.infinity,
-        height: double.infinity,
+
         child: FadeTransition(
           opacity: _fadeIn,
           child: Center(
             child: Container(
-              padding: const EdgeInsets.all(20),
-              width: screenWidth < 500 ? screenWidth * 0.9 : 380,
+              width: width < 500 ? width * 0.9 : 380,
+              padding: const EdgeInsets.all(22),
+
+              // 🌸 Soft White Card
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: Colors.white30),
+                color: Colors.white.withOpacity(0.75),
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(color: Colors.white.withOpacity(0.9)),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.2),
-                    blurRadius: 15,
-                    offset: const Offset(0, 8),
+                    color: Colors.black12.withOpacity(0.1),
+                    blurRadius: 18,
+                    offset: const Offset(0, 6),
                   ),
                 ],
               ),
+
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -84,24 +90,25 @@ class _RegisterScreenState extends State<RegisterScreen>
                   const Text(
                     "Set New PIN",
                     style: TextStyle(
-                      color: Colors.white,
                       fontSize: 28,
+                      color: Color(0xFFB03A75),
                       fontWeight: FontWeight.bold,
                     ),
                   ),
 
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 8),
+
                   Text(
                     "Your PIN must be 6 digits",
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.85),
-                      fontSize: 14,
+                      color: Colors.black.withOpacity(0.55),
+                      fontSize: 15,
                     ),
                   ),
 
                   const SizedBox(height: 25),
 
-                  // PIN TextField
+                  // PIN Field
                   TextField(
                     controller: passwordController,
                     obscureText: !passwordVisible,
@@ -109,53 +116,51 @@ class _RegisterScreenState extends State<RegisterScreen>
                     maxLength: 6,
                     textAlign: TextAlign.center,
                     style: const TextStyle(
-                      color: Colors.white,
                       fontSize: 20,
-                      letterSpacing: 4,
+                      letterSpacing: 3,
+                      color: Colors.black87,
                     ),
                     decoration: InputDecoration(
                       counterText: "",
                       filled: true,
-                      fillColor: Colors.white.withValues(alpha: 0.15),
+                      fillColor: Colors.white.withOpacity(0.9),
                       hintText: "Enter 6-digit PIN",
-                      hintStyle: const TextStyle(color: Colors.white70),
+                      hintStyle: TextStyle(color: Colors.grey.shade500),
                       prefixIcon: const Icon(
                         Icons.lock_outline,
-                        color: Colors.white70,
+                        color: Color(0xFFB03A75),
                       ),
                       suffixIcon: IconButton(
                         icon: Icon(
                           passwordVisible
                               ? Icons.visibility
                               : Icons.visibility_off,
-                          color: Colors.white,
+                          color: Color(0xFFB03A75),
                         ),
                         onPressed: () {
-                          setState(() {
-                            passwordVisible = !passwordVisible;
-                          });
+                          setState(() => passwordVisible = !passwordVisible);
                         },
                       ),
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(14),
-                        borderSide: const BorderSide(color: Colors.white),
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide(color: Colors.pink.shade200),
                       ),
                     ),
                   ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 18),
 
                   // Save Button
                   SizedBox(
                     width: double.infinity,
-                    height: 50,
+                    height: 52,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: const Color(0xFF8E3B8E),
-                        elevation: 4,
+                        backgroundColor: const Color(0xFFB03A75),
+                        foregroundColor: Colors.white,
+                        elevation: 2,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
+                          borderRadius: BorderRadius.circular(16),
                         ),
                       ),
                       onPressed: savePin,
@@ -169,24 +174,28 @@ class _RegisterScreenState extends State<RegisterScreen>
                     ),
                   ),
 
-                  const SizedBox(height: 15),
+                  const SizedBox(height: 16),
 
                   GestureDetector(
                     onTap: () {
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (_) => const LoginScreen()),
+                        MaterialPageRoute(
+                          builder: (_) => const LoginScreen(),
+                        ),
                       );
                     },
-                    child: Text(
+                    child: const Text(
                       "Back to Login",
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.9),
                         fontSize: 15,
                         decoration: TextDecoration.underline,
+                        color: Color(0xFFB03A75),
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
+
                   const SizedBox(height: 10),
                 ],
               ),
@@ -197,9 +206,9 @@ class _RegisterScreenState extends State<RegisterScreen>
     );
   }
 
-  // -------------------------------------------
+  // -------------------------------------------------------------------
   // SAVE PIN LOGIC
-  // -------------------------------------------
+  // -------------------------------------------------------------------
   Future<void> savePin() async {
     String pin = passwordController.text.trim();
 
@@ -213,6 +222,7 @@ class _RegisterScreenState extends State<RegisterScreen>
     await prefs.setBool('remember', false);
 
     showSnack("PIN saved successfully!");
+
     if (mounted) {
       Navigator.pushReplacement(
         context,
@@ -222,6 +232,8 @@ class _RegisterScreenState extends State<RegisterScreen>
   }
 
   void showSnack(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(msg)),
+    );
   }
 }

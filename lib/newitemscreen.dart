@@ -1,6 +1,4 @@
-// --------------------------------------------------------------
-// NEW & IMPROVED UI FOR ADDING NEW ITEM (Modern + Responsive)
-// --------------------------------------------------------------
+
 
 import 'dart:io';
 import 'package:flutter/material.dart';

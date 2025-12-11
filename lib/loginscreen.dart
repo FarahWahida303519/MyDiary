@@ -12,28 +12,48 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen>
     with SingleTickerProviderStateMixin {
-  TextEditingController passwordController = TextEditingController();
+
+  final TextEditingController passwordController = TextEditingController();
   bool passwordVisible = false;
   bool isCheck = false;
   String password = "";
 
   late AnimationController _controller;
-  late Animation<double> _fadeIn;
+  late Animation<double> _fade;
+
+  bool prefsLoaded = false;
 
   @override
   void initState() {
     super.initState();
-    loadPref();
+    _initAnimation();
+    _loadPrefs();
+  }
 
-    // Fade-in animation
+  void _initAnimation() {
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 900),
+      duration: const Duration(milliseconds: 700),
     );
-    _fadeIn = Tween<double>(
-      begin: 0,
-      end: 1,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+
+    _fade = Tween(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+    );
+  }
+
+  Future<void> _loadPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    password = prefs.getString('password') ?? '';
+    isCheck = prefs.getBool('remember') ?? false;
+
+    if (isCheck) {
+      passwordController.text = password;
+    }
+
+    setState(() {
+      prefsLoaded = true;
+    });
+
     _controller.forward();
   }
 
@@ -43,44 +63,51 @@ class _LoginScreenState extends State<LoginScreen>
     super.dispose();
   }
 
-  // ------------------------------
-  // BUILD UI
-  // ------------------------------
+  // -----------------------------------------------------
+  // UI  
+  // -----------------------------------------------------
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
 
+    // Prevents UI from building before prefs loaded (fixes lag)
+    if (!prefsLoaded) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(color: Colors.pink),
+        ),
+      );
+    }
+
     return Scaffold(
       body: Container(
-        width: double.infinity,
-        height: double.infinity,
-
-        // 🌈 Modern Gradient Background
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF8E3B8E), Color(0xFF6A1B9A)],
+            colors: [
+              Color(0xFFFDE2F3),
+              Color(0xFFF8CEE3),
+              Color(0xFFF3B7D2),
+            ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
         ),
 
         child: FadeTransition(
-          opacity: _fadeIn,
+          opacity: _fade,
           child: Center(
             child: Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(24),
               width: screenWidth < 500 ? screenWidth * 0.9 : 380,
 
-              // ⚪ Glass-like Card UI
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: Colors.white30),
+                color: Colors.white.withOpacity(0.85),
+                borderRadius: BorderRadius.circular(22),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.15),
-                    blurRadius: 15,
-                    offset: const Offset(0, 8),
+                    color: Colors.black.withOpacity(0.07),
+                    blurRadius: 12,   // LIGHTER shadow = smoother UI
+                    offset: const Offset(0, 6),
                   ),
                 ],
               ),
@@ -88,47 +115,47 @@ class _LoginScreenState extends State<LoginScreen>
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const SizedBox(height: 10),
-
-                  // 🔑 Login title
                   const Text(
                     "Enter PIN",
                     style: TextStyle(
-                      color: Colors.white,
+                      color: Color(0xFFB03A75),
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
 
-                  const SizedBox(height: 8),
-                  Text(
-                    "Unlock your MyList V2 account",
+                  const SizedBox(height: 6),
+                  const Text(
+                    "Unlock your MyDiary",
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.85),
                       fontSize: 14,
+                      color: Colors.black54,
                     ),
                   ),
 
-                  const SizedBox(height: 25),
+                  const SizedBox(height: 22),
 
-                  // 🔢 PIN input field
+                  // PIN field
                   TextField(
                     controller: passwordController,
                     obscureText: !passwordVisible,
                     keyboardType: TextInputType.number,
                     maxLength: 6,
+                    textAlign: TextAlign.center,
+
                     decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Colors.white.withValues(alpha: 0.2),
                       counterText: "",
+                      filled: true,
+                      fillColor: Colors.white,
                       hintText: "Enter 6-digit PIN",
-                      hintStyle: const TextStyle(color: Colors.white70),
+                      hintStyle: TextStyle(color: Colors.grey.shade500),
+
                       suffixIcon: IconButton(
                         icon: Icon(
                           passwordVisible
                               ? Icons.visibility
                               : Icons.visibility_off,
-                          color: Colors.white,
+                          color: const Color(0xFFB03A75),
                         ),
                         onPressed: () {
                           setState(() {
@@ -136,105 +163,90 @@ class _LoginScreenState extends State<LoginScreen>
                           });
                         },
                       ),
+
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(14),
-                        borderSide: const BorderSide(color: Colors.white),
+                        borderRadius: BorderRadius.circular(16),
+                        borderSide: BorderSide(color: Colors.pink.shade200),
                       ),
                     ),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      letterSpacing: 4,
-                    ),
-                    textAlign: TextAlign.center,
                   ),
 
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 8),
 
-                  // 🔘 Remember Me
+                  // Remember Me
                   Row(
                     children: [
-                      Text(
-                        "Remember Me",
-                        style: TextStyle(color: Colors.white),
-                      ),
+                      const Text("Remember Me",
+                          style: TextStyle(color: Colors.black87)),
                       const Spacer(),
                       Checkbox(
                         value: isCheck,
-                        checkColor: Colors.white,
-                        activeColor: Colors.purpleAccent,
+                        activeColor: Colors.pinkAccent,
                         onChanged: (value) async {
-                          final SharedPreferences prefs =
-                              await SharedPreferences.getInstance();
-
                           if (value == true) {
                             if (passwordController.text.length < 6) {
-                              showMessage("Please enter a 6-digit PIN first!");
+                              showMessage("Enter 6-digit PIN first!");
                               return;
                             }
-                            prefs.setBool('remember', true);
-                            showMessage("Preference saved!");
-                          } else {
-                            prefs.setBool('remember', false);
-                            passwordController.clear();
-                            showMessage("Preference removed!");
                           }
 
-                          setState(() => isCheck = value!);
+                          final prefs =
+                              await SharedPreferences.getInstance();
+                          prefs.setBool('remember', value!);
+
+                          if (!value) passwordController.clear();
+
+                          setState(() => isCheck = value);
                         },
                       ),
                     ],
                   ),
 
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 12),
 
-                  // 🚀 Login Button
+                  // Unlock button
                   SizedBox(
                     width: double.infinity,
                     height: 50,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: Color(0xFF8E3B8E),
-                        elevation: 4,
+                        backgroundColor: const Color(0xFFB03A75),
+                        foregroundColor: Colors.white,
+                        elevation: 2,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
+                          borderRadius: BorderRadius.circular(16),
                         ),
                       ),
                       onPressed: _handleLogin,
                       child: const Text(
                         "Unlock",
                         style: TextStyle(
-                          fontSize: 18,
                           fontWeight: FontWeight.bold,
+                          fontSize: 17,
                         ),
                       ),
                     ),
                   ),
 
-                  const SizedBox(height: 15),
+                  const SizedBox(height: 16),
 
-                  // 🛠 Set / Change PIN
                   GestureDetector(
                     onTap: () {
-                      if (password.isNotEmpty) {
-                        //showenterpinDialog(); to check if password/pin is not empty
-                        showEnterPinDialog();
-                      } else {
+                      if (password.isEmpty) {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const RegisterScreen(),
-                          ),
+                              builder: (_) => const RegisterScreen()),
                         );
+                      } else {
+                        showEnterPinDialog();
                       }
                     },
-                    child: Text(
+                    child: const Text(
                       "Set / Change PIN",
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.9),
-                        fontSize: 15,
-                        decoration: TextDecoration.none,
+                        color: Color(0xFFB03A75),
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
@@ -249,9 +261,9 @@ class _LoginScreenState extends State<LoginScreen>
     );
   }
 
-  // ------------------------------
+  // -----------------------------------------------------
   // LOGIN LOGIC
-  // ------------------------------
+  // -----------------------------------------------------
   void _handleLogin() {
     if (password.isEmpty) {
       showMessage("Please set PIN first!");
@@ -261,123 +273,72 @@ class _LoginScreenState extends State<LoginScreen>
     if (passwordController.text == password) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const MainScreen()),
+        MaterialPageRoute(builder: (_) => const MainScreen()),
       );
     } else {
       showMessage("Wrong PIN!");
     }
   }
 
-  // ------------------------------
-  // SHOW MESSAGE
-  // ------------------------------
   void showMessage(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(msg)));
   }
 
-  // ------------------------------
-  // LOAD SHARED PREFS
-  // ------------------------------
-  Future<void> loadPref() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    password = prefs.getString('password') ?? '';
-    isCheck = prefs.getBool('remember') ?? false;
-
-    if (isCheck) {
-      passwordController.text = password;
-    }
-    setState(() {});
-  }
-
+  // PIN Verification Dialog
   void showEnterPinDialog() {
     TextEditingController pinController = TextEditingController();
-    bool isVisible = false;
+    bool visible = false;
 
     showDialog(
       context: context,
-      barrierDismissible: false, // cannot close by tapping outside
       builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(18),
-              ),
-              title: const Text(
-                "Enter PIN",
-                textAlign: TextAlign.center,
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-
-              content: SizedBox(
-                width: 250,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextField(
-                      controller: pinController,
-                      keyboardType: TextInputType.number,
-                      obscureText: !isVisible,
-                      maxLength: 6,
-                      textAlign: TextAlign.center,
-                      decoration: InputDecoration(
-                        hintText: "6-digit PIN",
-                        counterText: "",
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            isVisible ? Icons.visibility : Icons.visibility_off,
-                          ),
-                          onPressed: () => setState(() {
-                            isVisible = !isVisible;
-                          }),
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text("Cancel"),
-                ),
-
-                ElevatedButton(
+        return StatefulBuilder(builder: (context, setStateDialog) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18),
+            ),
+            title: const Text("Enter PIN", textAlign: TextAlign.center),
+            content: TextField(
+              controller: pinController,
+              obscureText: !visible,
+              maxLength: 6,
+              keyboardType: TextInputType.number,
+              textAlign: TextAlign.center,
+              decoration: InputDecoration(
+                counterText: "",
+                suffixIcon: IconButton(
+                  icon: Icon(
+                      visible ? Icons.visibility : Icons.visibility_off),
                   onPressed: () {
-                    final enteredPin = pinController.text.trim();
-
-                    if (enteredPin.isEmpty || enteredPin.length < 6) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("PIN must be 6 digits.")),
-                      );
-                      return;
-                    }
-
-                    if (enteredPin == password) {
-                      Navigator.pop(context); // close dialog
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const RegisterScreen(),
-                        ),
-                      );
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Incorrect PIN!")),
-                      );
-                    }
+                    setStateDialog(() => visible = !visible);
                   },
-                  child: const Text("Unlock"),
                 ),
-              ],
-            );
-          },
-        );
+              ),
+            ),
+            actions: [
+              TextButton(
+                child: const Text("Cancel"),
+                onPressed: () => Navigator.pop(context),
+              ),
+              ElevatedButton(
+                child: const Text("Unlock"),
+                onPressed: () {
+                  if (pinController.text == password) {
+                    Navigator.pop(context);
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const RegisterScreen()),
+                    );
+                  } else {
+                    showMessage("Incorrect PIN!");
+                  }
+                },
+              ),
+            ],
+          );
+        });
       },
     );
   }
