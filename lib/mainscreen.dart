@@ -30,11 +30,11 @@ class _MainScreenState extends State<MainScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF3F0F7),
+      backgroundColor: const Color(0xFFFCE9F3), // soft diary pink
 
       floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xFF8E3B8E),
-        child: const Icon(Icons.add),
+        backgroundColor: const Color(0xFFE06092),
+        child: const Icon(Icons.add, color: Colors.white),
         onPressed: () async {
           await Navigator.push(
             context,
@@ -46,76 +46,68 @@ class _MainScreenState extends State<MainScreen> {
 
       body: Column(
         children: [
-          // ---------------------------------------------------------
-          // HEADER
-          // ---------------------------------------------------------
+          // ==========================================================
+          // SOFT-PINK DIARY HEADER
+          // ==========================================================
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.only(top: 60, bottom: 30),
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFF8E3B8E), Color(0xFF6A1B9A)],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-              borderRadius: BorderRadius.vertical(bottom: Radius.circular(22)),
+            padding: const EdgeInsets.only(top: 55, bottom: 25),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFCE9F3),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
+                ),
+              ],
             ),
             child: Column(
               children: [
                 Stack(
+                  alignment: Alignment.center,
                   children: [
-                    // Centered title
-                    Center(
-                      child: Text(
-                        "MyList V2",
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 30,
-                          fontWeight: FontWeight.bold,
-                        ),
+                    // Center Title
+                    const Text(
+                      "My Diary Entries",
+                      style: TextStyle(
+                        color: Colors.black87,
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
 
-                    // Icon aligned far right
+                    // Right side buttons
                     Positioned(
-                      right: 40,
+                      right: 50,
                       child: IconButton(
-                        icon: const Icon(
-                          Icons.exit_to_app,
-                          color: Colors.white,
-                        ),
-                        onPressed: () {
-                          //push to login dialog
-                          showLogoutDialog();
-                        },
+                        icon: const Icon(Icons.exit_to_app, color: Colors.black87),
+                        onPressed: () => showLogoutDialog(),
                       ),
                     ),
                     Positioned(
-                      right: 0,
+                      right: 10,
                       child: IconButton(
-                        icon: const Icon(Icons.info, color: Colors.white),
-                        onPressed: () {
-                          showAboutAndDonate();
-                        },
+                        icon: const Icon(Icons.info_outline, color: Colors.black87),
+                        onPressed: () => showAboutAndDonate(),
                       ),
                     ),
                   ],
                 ),
 
-                const SizedBox(height: 15),
+                const SizedBox(height: 12),
 
-                // Search bar
-                // 🔍 Search Bar (Modern Floating Style + Reset Button)
+                // ===================== Search Field =====================
                 Container(
                   width: screenWidth * 0.9,
                   padding: const EdgeInsets.symmetric(horizontal: 15),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Colors.white.withOpacity(0.9),
                     borderRadius: BorderRadius.circular(14),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black26.withValues(alpha: 0.1),
-                        blurRadius: 8,
+                        color: Colors.black12.withOpacity(0.08),
+                        blurRadius: 6,
                         offset: const Offset(0, 2),
                       ),
                     ],
@@ -126,29 +118,26 @@ class _MainScreenState extends State<MainScreen> {
 
                       const SizedBox(width: 8),
 
-                      // Tappable search field
                       Expanded(
                         child: GestureDetector(
                           onTap: showSearchDialog,
                           child: const Padding(
                             padding: EdgeInsets.symmetric(vertical: 14),
                             child: Text(
-                              "Search tasks...",
+                              "Search diary entries...",
                               style: TextStyle(
-                                color: Colors.grey,
                                 fontSize: 16,
+                                color: Colors.grey,
                               ),
                             ),
                           ),
                         ),
                       ),
 
-                      // ❌ Reset Search Button
                       IconButton(
                         icon: const Icon(Icons.close, color: Colors.grey),
-                        tooltip: "Reset search",
                         onPressed: () {
-                          loadData(); // reload full list
+                          loadData();
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text("Search reset")),
                           );
@@ -161,102 +150,76 @@ class _MainScreenState extends State<MainScreen> {
             ),
           ),
 
-          // ---------------------------------------------------------
-          // CONTENT AREA
-          // ---------------------------------------------------------
+          // ==========================================================
+          // CONTENT LIST AREA
+          // ==========================================================
           Expanded(
             child: mylist.isEmpty
                 ? Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Container(
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black12,
-                                blurRadius: 12,
-                                offset: Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: Icon(
-                            Icons.folder_open_rounded,
-                            size: 60,
-                            color: Color(0xFF8E3B8E),
-                          ),
-                        ),
-
+                        Icon(Icons.menu_book_rounded,
+                            size: 90, color: Colors.pink.shade200),
                         const SizedBox(height: 20),
-
                         Text(
                           status,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
                             color: Colors.black87,
                           ),
                         ),
-
-                        const SizedBox(height: 6),
-
-                        Text(
-                          "No task found. Add one to get started!",
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[600],
+                        Padding(
+                          padding: const EdgeInsets.only(top: 5),
+                          child: Text(
+                            "Start writing your beautiful moments...",
+                            style: TextStyle(
+                                fontSize: 14, color: Colors.grey.shade600),
                           ),
-                        ),
+                        )
                       ],
                     ),
                   )
                 : ListView.builder(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(15),
                     itemCount: mylist.length,
                     itemBuilder: (_, index) {
                       final item = mylist[index];
                       final isCompleted = item.status == "Completed";
-                      return InkWell(
-                        onTap: () => showDetailsDialog(item),
-                        child: Container(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(14),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.06),
-                                blurRadius: 8,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // =====================================================================
-                              // 1) IMAGE SECTION - takes 30% width
-                              // =====================================================================
-                              SizedBox(
-                                width: screenWidth * 0.20,
-                                height: 80,
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(10),
-                                  child: loadImageWidget(item.imagename),
-                                ),
-                              ),
 
-                              const SizedBox(width: 12),
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.9),
+                          borderRadius: BorderRadius.circular(18),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black12.withOpacity(0.08),
+                              blurRadius: 6,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            // ================= IMAGE =================
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: SizedBox(
+                                width: 70,
+                                height: 70,
+                                child: loadImageWidget(item.imagename),
+                              ),
+                            ),
 
-                              // =====================================================================
-                              // 2) CONTENT SECTION - takes ~50% width
-                              // =====================================================================
-                              SizedBox(
-                                width: screenWidth * 0.50 - 40,
+                            const SizedBox(width: 12),
+
+                            // ================= TEXT SECTION =================
+                            Expanded(
+                              child: InkWell(
+                                onTap: () => showDetailsDialog(item),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -265,103 +228,70 @@ class _MainScreenState extends State<MainScreen> {
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
                                         fontSize: 17,
-                                      ),
-                                    ),
-
-                                    const SizedBox(height: 4),
-
-                                    Text(
-                                      item.description.trim().isEmpty
-                                          ? "NA"
-                                          : item.description,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
                                         color: Colors.black87,
                                       ),
                                     ),
-
+                                    const SizedBox(height: 5),
+                                    Text(
+                                      item.description.isEmpty
+                                          ? "No description"
+                                          : item.description,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.grey.shade700),
+                                    ),
                                     const SizedBox(height: 6),
-
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 10,
-                                        vertical: 4,
+                                    Text(
+                                      item.date,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey.shade600,
                                       ),
-                                      decoration: BoxDecoration(
-                                        color: isCompleted
-                                            ? Colors.green[100]
-                                            : Colors.orange[100],
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      child: Text(
-                                        item.status,
-                                        style: TextStyle(
-                                          color: isCompleted
-                                              ? Colors.green[800]
-                                              : Colors.orange[800],
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ),
+                                    )
                                   ],
                                 ),
                               ),
+                            ),
 
-                              // =====================================================================
-                              // 3) ACTION BUTTONS SECTION - remaining width (~20%)
-                              // =====================================================================
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
+                            // ================= ACTION BUTTONS =================
+                            Column(
+                              children: [
+                                Row(
                                   children: [
-                                    // Top Row: Edit + Delete icons
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        IconButton(
-                                          icon: const Icon(
-                                            Icons.edit,
-                                            size: 22,
-                                          ),
-                                          onPressed: () => editItemDialog(item),
-                                        ),
-                                        IconButton(
-                                          icon: const Icon(
-                                            Icons.delete,
-                                            size: 22,
-                                            color: Colors.red,
-                                          ),
-                                          onPressed: () =>
-                                              deleteDialog(item.id),
-                                        ),
-                                      ],
+                                    IconButton(
+                                      icon: const Icon(Icons.edit, size: 22),
+                                      onPressed: () => editItemDialog(item),
                                     ),
-
-                                    // Bottom: Checkbox
-                                    Checkbox(
-                                      value: isCompleted,
-                                      onChanged: (val) =>
-                                          confirmDialogStatus(index, val!),
+                                    IconButton(
+                                      icon: const Icon(Icons.delete,
+                                          size: 22, color: Colors.red),
+                                      onPressed: () => deleteDialog(item.id),
                                     ),
                                   ],
                                 ),
-                              ),
-                            ],
-                          ),
+                                Checkbox(
+                                  value: isCompleted,
+                                  activeColor: Colors.pink,
+                                  onChanged: (val) =>
+                                      confirmDialogStatus(index, val!),
+                                )
+                              ],
+                            )
+                          ],
                         ),
                       );
                     },
                   ),
           ),
 
-          // Pagination
+          // =============== PAGE NAVIGATION ===============
           if (mylist.isNotEmpty)
             Padding(
-              padding: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.only(bottom: 12, top: 8),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -376,7 +306,8 @@ class _MainScreenState extends State<MainScreen> {
                   ),
                   Text(
                     "Page $curpageno of $pages",
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontSize: 14, fontWeight: FontWeight.bold),
                   ),
                   IconButton(
                     icon: const Icon(Icons.arrow_forward_ios),
@@ -456,7 +387,7 @@ class _MainScreenState extends State<MainScreen> {
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.red.withValues(alpha: 0.1),
+                    color: Colors.red.withOpacity(0.12),
                   ),
                   child: const Icon(
                     Icons.delete_forever_rounded,
@@ -570,13 +501,13 @@ class _MainScreenState extends State<MainScreen> {
                 Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF8E3B8E).withValues(alpha: 0.12),
+                    color: const Color(0xFFE06092).withOpacity(0.12),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
                     value ? Icons.check_circle : Icons.pending_actions,
                     size: 45,
-                    color: const Color(0xFF8E3B8E),
+                    color: const Color(0xFFE06092),
                   ),
                 ),
 
@@ -588,7 +519,7 @@ class _MainScreenState extends State<MainScreen> {
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: const Color(0xFF6A1B9A),
+                    color: const Color(0xFFE06092),
                   ),
                 ),
 
@@ -611,8 +542,8 @@ class _MainScreenState extends State<MainScreen> {
                     Expanded(
                       child: OutlinedButton(
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFF8E3B8E),
-                          side: const BorderSide(color: Color(0xFF8E3B8E)),
+                          foregroundColor: const Color(0xFFE06092),
+                          side: const BorderSide(color: Color(0xFFE06092)),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -629,7 +560,7 @@ class _MainScreenState extends State<MainScreen> {
                     Expanded(
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF8E3B8E),
+                          backgroundColor: const Color(0xFFE06092),
                           foregroundColor: Colors.white,
                           elevation: 3,
                           shape: RoundedRectangleBorder(
@@ -651,7 +582,6 @@ class _MainScreenState extends State<MainScreen> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text("Status updated to $newStatus"),
-                                // backgroundColor: Colors.green[600],
                               ),
                             );
                           }
@@ -758,20 +688,14 @@ class _MainScreenState extends State<MainScreen> {
                         vertical: 8,
                       ),
                       decoration: BoxDecoration(
-                        color: isCompleted
-                            ? Colors.green[50]
-                            : Colors.orange[50],
+                        color: isCompleted ? Colors.green[50] : Colors.orange[50],
                         borderRadius: BorderRadius.circular(14),
                       ),
                       child: Row(
                         children: [
                           Icon(
-                            isCompleted
-                                ? Icons.check_circle
-                                : Icons.pending_outlined,
-                            color: isCompleted
-                                ? Colors.green[700]
-                                : Colors.orange[700],
+                            isCompleted ? Icons.check_circle : Icons.pending_outlined,
+                            color: isCompleted ? Colors.green[700] : Colors.orange[700],
                           ),
                           const SizedBox(width: 10),
                           Text(
@@ -779,9 +703,7 @@ class _MainScreenState extends State<MainScreen> {
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
-                              color: isCompleted
-                                  ? Colors.green[700]
-                                  : Colors.orange[700],
+                              color: isCompleted ? Colors.green[700] : Colors.orange[700],
                             ),
                           ),
                           const Spacer(),
@@ -816,7 +738,7 @@ class _MainScreenState extends State<MainScreen> {
 
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF8E3B8E),
+                            backgroundColor: const Color(0xFFE06092),
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -834,8 +756,7 @@ class _MainScreenState extends State<MainScreen> {
                             }
 
                             item.title = titleController.text.trim();
-                            item.description = descriptionController.text
-                                .trim();
+                            item.description = descriptionController.text.trim();
                             item.status = isCompleted ? "Completed" : "Pending";
 
                             await DatabaseHelper().updateMyList(item);
@@ -910,9 +831,7 @@ class _MainScreenState extends State<MainScreen> {
                       _infoChip(
                         Icons.check_circle,
                         item.status,
-                        item.status == "Completed"
-                            ? Colors.green[700]
-                            : Colors.orange[700],
+                        item.status == "Completed" ? Colors.green[700] : Colors.orange[700],
                       ),
                       const SizedBox(width: 10),
                       _infoChip(
@@ -929,7 +848,7 @@ class _MainScreenState extends State<MainScreen> {
                     width: double.infinity,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF8E3B8E),
+                        backgroundColor: const Color(0xFFE06092),
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
@@ -1039,7 +958,7 @@ class _MainScreenState extends State<MainScreen> {
                     const SizedBox(width: 10),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF8E3B8E),
+                        backgroundColor: const Color(0xFFE06092),
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
@@ -1081,7 +1000,7 @@ class _MainScreenState extends State<MainScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               const Text(
-                "MyList V2\nA simple and beautiful task manager.\n\n"
+                "My Diary\nA simple and beautiful diary app.\n\n"
                 "If you find this app useful, consider supporting its development!",
                 textAlign: TextAlign.center,
               ),
@@ -1090,7 +1009,7 @@ class _MainScreenState extends State<MainScreen> {
                 icon: const Icon(Icons.favorite),
                 label: const Text("Donate"),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF8E3B8E),
+                  backgroundColor: const Color(0xFFE06092),
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -1136,7 +1055,7 @@ class _MainScreenState extends State<MainScreen> {
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.red.withValues(alpha: 0.12),
+                    color: Colors.red.withOpacity(0.12),
                   ),
                   child: const Icon(Icons.logout, size: 42, color: Colors.red),
                 ),
@@ -1157,7 +1076,7 @@ class _MainScreenState extends State<MainScreen> {
                 // MESSAGE
                 // -------------------------------------------------------
                 Text(
-                  "Are you sure you want to logout from MyList V2?",
+                  "Are you sure you want to logout from My Diary?",
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 16,
@@ -1177,8 +1096,8 @@ class _MainScreenState extends State<MainScreen> {
                     Expanded(
                       child: OutlinedButton(
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFF8E3B8E),
-                          side: const BorderSide(color: Color(0xFF8E3B8E)),
+                          foregroundColor: const Color(0xFFE06092),
+                          side: const BorderSide(color: Color(0xFFE06092)),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -1195,7 +1114,7 @@ class _MainScreenState extends State<MainScreen> {
                     Expanded(
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF8E3B8E),
+                          backgroundColor: const Color(0xFFE06092),
                           foregroundColor: Colors.white,
                           elevation: 2,
                           shape: RoundedRectangleBorder(

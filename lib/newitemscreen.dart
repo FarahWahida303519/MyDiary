@@ -1,5 +1,3 @@
-
-
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
@@ -17,218 +15,215 @@ class NewItemScreen extends StatefulWidget {
 }
 
 class _NewItemScreenState extends State<NewItemScreen> {
-  late double screenHeight;
-  late double screenWidth;
-
   File? image;
 
   final TextEditingController titleController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
-  final DateFormat formatter = DateFormat('dd/MM/yyyy HH:mm a');
+  final DateFormat formatter = DateFormat('dd MMM yyyy');
 
   @override
   Widget build(BuildContext context) {
-    screenHeight = MediaQuery.of(context).size.height;
-    screenWidth = MediaQuery.of(context).size.width;
-    if (screenWidth > 600) screenWidth = 600;
-
     return Scaffold(
-      // 🌈 Purple gradient header background
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF8E3B8E), Color(0xFF6A1B9A)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              Row(
+      backgroundColor: const Color(0xFFFCE9F3), // soft diary pink
+      body: SafeArea(
+        child: Column(
+          children: [
+            // ================== TOP BAR ==================
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              child: Row(
                 children: [
-                  const SizedBox(width: 10),
                   GestureDetector(
                     onTap: () => Navigator.pop(context),
-                    child: const Icon(
-                      Icons.arrow_back,
-                      color: Colors.white,
-                      size: 32,
+                    child: const Icon(Icons.arrow_back,
+                        size: 26, color: Colors.black87),
+                  ),
+                  const Spacer(),
+
+                  // More options (dummy)
+                  const Icon(Icons.more_vert, color: Colors.black87),
+
+                  const SizedBox(width: 12),
+
+                  // SAVE BUTTON (TOP RIGHT)
+                  ElevatedButton(
+                    onPressed: showConfirmDialog,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFE06092),
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 18, vertical: 10),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: const Text(
+                      "SAVE",
+                      style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white),
                     ),
                   ),
                 ],
               ),
-              // -------------------------------
-              // HEADER
-              // -------------------------------
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20),
-                child: Text(
-                  "Add New Entry",
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.0,
-                  ),
-                ),
-              ),
+            ),
 
-              // -------------------------------
-              // FORM SECTION (white rounded container)
-              // -------------------------------
-              Expanded(
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(18),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(30),
-                    ),
-                  ),
-                  child: SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        // -----------------------------------
-                        // IMAGE PICKER BOX
-                        // -----------------------------------
-                        GestureDetector(
-                          onTap: selectCameraGalleryDialog,
-                          child: Container(
-                            height: screenHeight * 0.25,
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade200,
-                              borderRadius: BorderRadius.circular(18),
-                              border: Border.all(color: Colors.grey.shade300),
-                            ),
-                            child: image == null
-                                ? Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(
-                                        Icons.camera_alt,
-                                        size: 70,
-                                        color: Colors.grey.shade600,
-                                      ),
-                                      const SizedBox(height: 8),
-                                      const Text(
-                                        "Tap to add image",
-                                        style: TextStyle(
-                                          color: Colors.black54,
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                    ],
-                                  )
-                                : ClipRRect(
-                                    borderRadius: BorderRadius.circular(18),
-                                    child: Image.file(
-                                      image!,
-                                      width: double.infinity,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                          ),
-                        ),
-
-                        const SizedBox(height: 20),
-
-                        // -----------------------------------
-                        // Title Input
-                        // -----------------------------------
-                        TextField(
-                          controller: titleController,
-                          decoration: InputDecoration(
-                            labelText: "List Title",
-                            prefixIcon: const Icon(Icons.title),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(14),
+            // ================== DIARY CONTENT ==================
+            Expanded(
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // ========== DATE DISPLAY ==========
+                      Row(
+                        children: [
+                          Text(
+                            DateFormat("dd")
+                                .format(DateTime.now()), // day bold
+                            style: const TextStyle(
+                              fontSize: 36,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 15),
-
-                        // -----------------------------------
-                        // Description Input
-                        // -----------------------------------
-                        TextField(
-                          controller: descriptionController,
-                          maxLines: 4,
-                          decoration: InputDecoration(
-                            labelText: "Description",
-                            prefixIcon: const Icon(Icons.description),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(height: 15),
-
-                        // -----------------------------------
-                        // CURRENT DATE
-                        // -----------------------------------
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.calendar_month,
-                              color: Colors.deepPurple,
-                            ),
-                            const SizedBox(width: 10),
-                            Text(
-                              "Date: ${formatter.format(DateTime.now())}",
-                              style: const TextStyle(
-                                fontSize: 16,
-                                color: Colors.black87,
+                          const SizedBox(width: 6),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                DateFormat("MMM yyyy")
+                                    .format(DateTime.now()),
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.black87,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
+                          const Spacer(),
+
+                          // EMOJI (optional but shown in UI)
+                          const Icon(Icons.emoji_emotions_outlined,
+                              color: Colors.black54, size: 28),
+                        ],
+                      ),
+
+                      const SizedBox(height: 15),
+
+                      // ========== TITLE ==========
+                      TextField(
+                        controller: titleController,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          color: Colors.black87,
+                          fontWeight: FontWeight.w500,
                         ),
+                        decoration: const InputDecoration(
+                          hintText: "Title",
+                          hintStyle: TextStyle(
+                              fontSize: 20, color: Colors.black45),
+                          border: InputBorder.none,
+                        ),
+                      ),
 
-                        const SizedBox(height: 20),
+                      const SizedBox(height: 15),
 
-                        // -----------------------------------
-                        // SAVE BUTTON
-                        // -----------------------------------
-                        SizedBox(
+                      // ========== DESCRIPTION ==========
+                      TextField(
+                        controller: descriptionController,
+                        maxLines: null,
+                        style: const TextStyle(
+                            fontSize: 17, color: Colors.black87),
+                        decoration: const InputDecoration(
+                          hintText: "Write more here...",
+                          hintStyle:
+                              TextStyle(fontSize: 17, color: Colors.black38),
+                          border: InputBorder.none,
+                        ),
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      // ========== IMAGE PICKER (CLICK TO ADD) ==========
+                      GestureDetector(
+                        onTap: selectCameraGalleryDialog,
+                        child: Container(
+                          height: 180,
                           width: double.infinity,
-                          height: 55,
-                          child: ElevatedButton(
-                            onPressed: showConfirmDialog,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF8E3B8E),
-                              foregroundColor: Colors.white,
-                              elevation: 4,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                            ),
-                            child: const Text(
-                              "Save Entry",
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.6),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                                color: Colors.black26, width: 1.2),
                           ),
+                          child: image == null
+                              ? Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: const [
+                                    Icon(Icons.camera_alt_rounded,
+                                        size: 38, color: Colors.black54),
+                                    SizedBox(height: 8),
+                                    Text(
+                                      "Tap to add image",
+                                      style: TextStyle(
+                                          color: Colors.black54, fontSize: 14),
+                                    ),
+                                  ],
+                                )
+                              : ClipRRect(
+                                  borderRadius: BorderRadius.circular(16),
+                                  child: Image.file(
+                                    image!,
+                                    width: double.infinity,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
                         ),
-                      ],
-                    ),
+                      ),
+
+                      const SizedBox(height: 40),
+                    ],
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+
+            // ================== BOTTOM TOOLBAR (LOOK ONLY) ==================
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.85),
+                boxShadow: [
+                  BoxShadow(
+                      color: Colors.black.withOpacity(0.1), blurRadius: 5)
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: const [
+                  Icon(Icons.brush_outlined),
+                  Icon(Icons.image_outlined),
+                  Icon(Icons.star_border),
+                  Icon(Icons.emoji_emotions_outlined),
+                  Icon(Icons.text_fields_outlined),
+                  Icon(Icons.format_list_bulleted_rounded),
+                  Icon(Icons.label_outline),
+                  Icon(Icons.mic_none_rounded),
+                ],
+              ),
+            )
+          ],
         ),
       ),
     );
   }
 
-  // ----------------------------------------------------
-  // IMAGE SELECTION DIALOG
-  // ----------------------------------------------------
+  // ===================== PICKER SHEET =====================
   void selectCameraGalleryDialog() {
     showModalBottomSheet(
       context: context,
@@ -238,23 +233,18 @@ class _NewItemScreenState extends State<NewItemScreen> {
       ),
       builder: (context) {
         return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 18),
+          padding: const EdgeInsets.all(22),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Title
-              const Text(
-                "Choose Image Source",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-
+              const Text("Choose Image Source",
+                  style: TextStyle(
+                      fontSize: 20, fontWeight: FontWeight.bold)),
               const SizedBox(height: 20),
 
-              // Camera + Gallery options
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  // CAMERA OPTION
                   GestureDetector(
                     onTap: () {
                       Navigator.pop(context);
@@ -265,22 +255,17 @@ class _NewItemScreenState extends State<NewItemScreen> {
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF8E3B8E).withValues(alpha: 0.12),
+                            color: const Color(0xFFE06092).withOpacity(0.18),
                             borderRadius: BorderRadius.circular(16),
                           ),
-                          child: const Icon(
-                            Icons.camera_alt_rounded,
-                            color: Color(0xFF8E3B8E),
-                            size: 40,
-                          ),
+                          child: const Icon(Icons.camera_alt_rounded,
+                              color: Color(0xFFE06092), size: 40),
                         ),
-                        const SizedBox(height: 8),
-                        const Text("Camera"),
+                        const SizedBox(height: 6),
+                        const Text("Camera")
                       ],
                     ),
                   ),
-
-                  // GALLERY OPTION
                   GestureDetector(
                     onTap: () {
                       Navigator.pop(context);
@@ -291,16 +276,13 @@ class _NewItemScreenState extends State<NewItemScreen> {
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF6A1B9A).withValues(alpha: 0.12),
+                            color: const Color(0xFFE06092).withOpacity(0.18),
                             borderRadius: BorderRadius.circular(16),
                           ),
-                          child: const Icon(
-                            Icons.photo_library_rounded,
-                            color: Color(0xFF6A1B9A),
-                            size: 40,
-                          ),
+                          child: const Icon(Icons.photo_library_rounded,
+                              color: Color(0xFFE06092), size: 40),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 6),
                         const Text("Gallery"),
                       ],
                     ),
@@ -308,16 +290,12 @@ class _NewItemScreenState extends State<NewItemScreen> {
                 ],
               ),
 
-              const SizedBox(height: 25),
-
-              // CANCEL BUTTON
+              const SizedBox(height: 20),
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text(
-                  "Cancel",
-                  style: TextStyle(color: Colors.black54, fontSize: 16),
-                ),
-              ),
+                child: const Text("Cancel",
+                    style: TextStyle(color: Colors.black54)),
+              )
             ],
           ),
         );
@@ -325,13 +303,11 @@ class _NewItemScreenState extends State<NewItemScreen> {
     );
   }
 
-  // CAMERA
+  // ===================== CAMERA =====================
   Future<void> openCamera() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(
-      source: ImageSource.camera,
-      maxHeight: 900,
-    );
+        source: ImageSource.camera, maxHeight: 900);
 
     if (pickedFile != null) {
       image = File(pickedFile.path);
@@ -339,11 +315,10 @@ class _NewItemScreenState extends State<NewItemScreen> {
     }
   }
 
-  // GALLERY
+  // ===================== GALLERY =====================
   Future<void> openGallery() async {
-    final pickedFile = await ImagePicker().pickImage(
-      source: ImageSource.gallery,
-    );
+    final pickedFile =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
       image = File(pickedFile.path);
@@ -351,7 +326,7 @@ class _NewItemScreenState extends State<NewItemScreen> {
     }
   }
 
-  // IMAGE CROPPER
+  // ===================== CROP IMAGE =====================
   Future<void> cropImage() async {
     CroppedFile? cropped = await ImageCropper().cropImage(
       sourcePath: image!.path,
@@ -359,10 +334,10 @@ class _NewItemScreenState extends State<NewItemScreen> {
       uiSettings: [
         AndroidUiSettings(
           toolbarTitle: "Crop Image",
-          toolbarColor: Colors.deepPurple,
+          toolbarColor: const Color(0xFFE06092),
           toolbarWidgetColor: Colors.white,
         ),
-        IOSUiSettings(title: "Crop Image"),
+        IOSUiSettings(title: "Crop Image")
       ],
     );
 
@@ -372,14 +347,12 @@ class _NewItemScreenState extends State<NewItemScreen> {
     }
   }
 
-  // ----------------------------------------------------
-  // SAVE CONFIRMATION
-  // ----------------------------------------------------
+  // ===================== CONFIRM SAVE =====================
   void showConfirmDialog() {
     if (titleController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Please enter a title.")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter a title.")),
+      );
       return;
     }
 
@@ -387,95 +360,55 @@ class _NewItemScreenState extends State<NewItemScreen> {
       context: context,
       builder: (context) {
         return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18),
-          ),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
           child: Padding(
             padding: const EdgeInsets.all(22),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Header Icon
                 Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF8E3B8E).withValues(alpha: 0.15),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.save_rounded,
-                    size: 40,
-                    color: Color(0xFF8E3B8E),
-                  ),
-                ),
-
-                const SizedBox(height: 18),
-
-                // Title
-                const Text(
-                  "Confirm Save",
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                ),
-
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                        color: const Color(0xFFE06092).withOpacity(0.2),
+                        shape: BoxShape.circle),
+                    child: const Icon(Icons.save_rounded,
+                        size: 36, color: Color(0xFFE06092))),
+                const SizedBox(height: 15),
+                const Text("Confirm Save",
+                    style:
+                        TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 10),
+                const Text("Save this diary entry?",
+                    style: TextStyle(fontSize: 15)),
+                const SizedBox(height: 20),
 
-                Text(
-                  "Do you want to save this entry to your list?",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 15, color: Colors.grey[700]),
-                ),
-
-                const SizedBox(height: 24),
-
-                // ACTION BUTTONS (Cancel + Save)
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Cancel button
                     Expanded(
                       child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Color(0xFF8E3B8E)),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                        ),
                         onPressed: () => Navigator.pop(context),
-                        child: const Text(
-                          "Cancel",
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Color(0xFF8E3B8E),
-                          ),
-                        ),
+                        style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: Color(0xFFE06092))),
+                        child: const Text("Cancel",
+                            style: TextStyle(color: Color(0xFFE06092))),
                       ),
                     ),
-
                     const SizedBox(width: 12),
-
-                    // Save button
                     Expanded(
                       child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF8E3B8E),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                        ),
                         onPressed: () {
                           Navigator.pop(context);
                           saveItem();
                         },
-                        child: const Text(
-                          "Save",
-                          style: TextStyle(fontSize: 16, color: Colors.white),
-                        ),
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFE06092)),
+                        child: const Text("Save",
+                            style: TextStyle(color: Colors.white)),
                       ),
                     ),
                   ],
-                ),
+                )
               ],
             ),
           ),
@@ -484,9 +417,7 @@ class _NewItemScreenState extends State<NewItemScreen> {
     );
   }
 
-  // ----------------------------------------------------
-  // SAVE ITEM TO SQLITE
-  // ----------------------------------------------------
+  // ===================== SAVE TO DATABASE =====================
   Future<void> saveItem() async {
     Directory appDir = await getApplicationDocumentsDirectory();
     String storedImagePath = "NA";
@@ -509,9 +440,9 @@ class _NewItemScreenState extends State<NewItemScreen> {
     );
 
     if (mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Entry saved successfully")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Entry saved successfully")),
+      );
       Navigator.pop(context);
     }
   }
