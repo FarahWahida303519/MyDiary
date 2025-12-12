@@ -1,6 +1,5 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:mydiary/loginscreen.dart';
 import 'package:mydiary/mainscreen.dart';
 import 'package:mydiary/registerscreen.dart';
 
