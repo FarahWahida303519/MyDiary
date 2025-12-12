@@ -18,8 +18,8 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFE9A7B8)),
         fontFamily: "Arial",
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFF0A8D0)),
       ),
       home: const SplashScreen(),
     );
@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
 }
 
 // ----------------------------------------------------------------------
-//  SPLASH SCREEN
+//  SPLASH SCREEN WITH PINK → BLUE GRADIENT
 // ----------------------------------------------------------------------
 
 class SplashScreen extends StatefulWidget {
@@ -80,14 +80,13 @@ class _SplashScreenState extends State<SplashScreen>
     return Scaffold(
       body: Stack(
         children: [
-          // Background gradient
+          // Gradient background
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  Color(0xFFFFF5F8),
-                  Color(0xFFFAD6E2),
-                  Color(0xFFF3BDD0),
+                  Color(0xFFFCE1F3), // pink
+                  Color(0xFFD2E4FF), // soft blue
                 ],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
@@ -95,10 +94,10 @@ class _SplashScreenState extends State<SplashScreen>
             ),
           ),
 
-          // Blur effect
+          // Blur glow overlay
           Positioned.fill(
             child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+              filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
               child: Container(color: Colors.transparent),
             ),
           ),
@@ -116,15 +115,15 @@ class _SplashScreenState extends State<SplashScreen>
                     width: screenHeight * 0.20,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: const Color(0xFFFFF1F5),
+                      color: Colors.white.withOpacity(0.6),
                       border: Border.all(
-                        color: Colors.white.withOpacity(0.8),
+                        color: Colors.white.withOpacity(0.9),
                         width: 2,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.pink.shade100.withOpacity(0.4),
-                          blurRadius: 20,
+                          color: Colors.pink.shade200.withOpacity(0.4),
+                          blurRadius: 25,
                           offset: const Offset(0, 8),
                         ),
                       ],
@@ -132,7 +131,7 @@ class _SplashScreenState extends State<SplashScreen>
                     child: Icon(
                       Icons.menu_book_rounded,
                       size: 85,
-                      color: Colors.pink.shade500,
+                      color: Colors.pink.shade600,
                     ),
                   ),
 
@@ -153,11 +152,11 @@ class _SplashScreenState extends State<SplashScreen>
                     "Your stories. Your space.",
                     style: TextStyle(
                       fontSize: 16,
-                      color: Colors.pink.shade600.withOpacity(0.75),
+                      color: Colors.pink.shade500.withOpacity(0.85),
                     ),
                   ),
 
-                  const SizedBox(height: 35),
+                  const SizedBox(height: 40),
 
                   const CircularProgressIndicator(
                     strokeWidth: 3,
@@ -174,7 +173,7 @@ class _SplashScreenState extends State<SplashScreen>
 }
 
 // ----------------------------------------------------------------------
-//  ASK PASSWORD SCREEN (NEW)
+//  ASK PASSWORD SCREEN WITH SAME PINK → BLUE GRADIENT
 // ----------------------------------------------------------------------
 
 class AskPasswordScreen extends StatelessWidget {
@@ -183,79 +182,108 @@ class AskPasswordScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF5F8),
-      body: Center(
-        child: Container(
-          padding: const EdgeInsets.all(25),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.pink.shade100.withOpacity(0.3),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
+      body: Stack(
+        children: [
+          // Background gradient same as splash
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xFFFCE1F3), // soft pink
+                  Color(0xFFD2E4FF), // baby blue
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
               ),
-            ],
+            ),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                "Do you want to set a password?",
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFFB03A75),
-                ),
-                textAlign: TextAlign.center,
-              ),
 
-              const SizedBox(height: 25),
+          // Blur overlay
+          Positioned.fill(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+              child: Container(color: Colors.transparent),
+            ),
+          ),
 
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // YES → Go to RegisterScreen
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFB03A75),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 22, vertical: 12),
-                    ),
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (_) => const RegisterScreen()),
-                      );
-                    },
-                    child: const Text("YES"),
-                  ),
-
-                  const SizedBox(width: 20),
-
-                  // NO → Go to MainScreen
-                  OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Color(0xFFB03A75)),
-                      foregroundColor: const Color(0xFFB03A75),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 22, vertical: 12),
-                    ),
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (_) => const MainScreen()),
-                      );
-                    },
-                    child: const Text("NO"),
+          // Card asking for password
+          Center(
+            child: Container(
+              padding: const EdgeInsets.all(25),
+              width: 320,
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.85),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.pink.shade100.withOpacity(0.4),
+                    blurRadius: 20,
+                    offset: const Offset(0, 4),
                   ),
                 ],
               ),
-            ],
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    "Do you want to set a password?",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFFB03A75),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+
+                  const SizedBox(height: 25),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // YES → Register
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFB03A75),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 25, vertical: 12),
+                        ),
+                        onPressed: () {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => const RegisterScreen()),
+                          );
+                        },
+                        child: const Text("YES"),
+                      ),
+
+                      const SizedBox(width: 20),
+
+                      // NO → MainScreen
+                      OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFFB03A75),
+                          side: const BorderSide(color: Color(0xFFB03A75)),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 25, vertical: 12),
+                        ),
+                        onPressed: () {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => const MainScreen()),
+                          );
+                        },
+                        child: const Text("NO"),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

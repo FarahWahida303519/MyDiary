@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:mydiary/mainscreen.dart';
 import 'package:mydiary/registerscreen.dart';
@@ -12,7 +13,6 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen>
     with SingleTickerProviderStateMixin {
-
   final TextEditingController passwordController = TextEditingController();
   bool passwordVisible = false;
   bool isCheck = false;
@@ -63,14 +63,10 @@ class _LoginScreenState extends State<LoginScreen>
     super.dispose();
   }
 
-  // -----------------------------------------------------
-  // UI  
-  // -----------------------------------------------------
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
 
-    // Prevents UI from building before prefs loaded (fixes lag)
     if (!prefsLoaded) {
       return const Scaffold(
         body: Center(
@@ -80,183 +76,207 @@ class _LoginScreenState extends State<LoginScreen>
     }
 
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Color(0xFFFDE2F3),
-              Color(0xFFF8CEE3),
-              Color(0xFFF3B7D2),
-            ],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-
-        child: FadeTransition(
-          opacity: _fade,
-          child: Center(
-            child: Container(
-              padding: const EdgeInsets.all(24),
-              width: screenWidth < 500 ? screenWidth * 0.9 : 380,
-
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.85),
-                borderRadius: BorderRadius.circular(22),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.07),
-                    blurRadius: 12,   // LIGHTER shadow = smoother UI
-                    offset: const Offset(0, 6),
-                  ),
+      body: Stack(
+        children: [
+          // -------------------------------------------------------
+          // THEME BACKGROUND (Pink → Blue Gradient)
+          // -------------------------------------------------------
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xFFFCE1F3), // soft pink
+                  Color(0xFFD2E4FF), // baby blue
                 ],
-              ),
-
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    "Enter PIN",
-                    style: TextStyle(
-                      color: Color(0xFFB03A75),
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-
-                  const SizedBox(height: 6),
-                  const Text(
-                    "Unlock your MyDiary",
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.black54,
-                    ),
-                  ),
-
-                  const SizedBox(height: 22),
-
-                  // PIN field
-                  TextField(
-                    controller: passwordController,
-                    obscureText: !passwordVisible,
-                    keyboardType: TextInputType.number,
-                    maxLength: 6,
-                    textAlign: TextAlign.center,
-
-                    decoration: InputDecoration(
-                      counterText: "",
-                      filled: true,
-                      fillColor: Colors.white,
-                      hintText: "Enter 6-digit PIN",
-                      hintStyle: TextStyle(color: Colors.grey.shade500),
-
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          passwordVisible
-                              ? Icons.visibility
-                              : Icons.visibility_off,
-                          color: const Color(0xFFB03A75),
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            passwordVisible = !passwordVisible;
-                          });
-                        },
-                      ),
-
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide(color: Colors.pink.shade200),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  // Remember Me
-                  Row(
-                    children: [
-                      const Text("Remember Me",
-                          style: TextStyle(color: Colors.black87)),
-                      const Spacer(),
-                      Checkbox(
-                        value: isCheck,
-                        activeColor: Colors.pinkAccent,
-                        onChanged: (value) async {
-                          if (value == true) {
-                            if (passwordController.text.length < 6) {
-                              showMessage("Enter 6-digit PIN first!");
-                              return;
-                            }
-                          }
-
-                          final prefs =
-                              await SharedPreferences.getInstance();
-                          prefs.setBool('remember', value!);
-
-                          if (!value) passwordController.clear();
-
-                          setState(() => isCheck = value);
-                        },
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  // Unlock button
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFB03A75),
-                        foregroundColor: Colors.white,
-                        elevation: 2,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                      onPressed: _handleLogin,
-                      child: const Text(
-                        "Unlock",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 17,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  GestureDetector(
-                    onTap: () {
-                      if (password.isEmpty) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (_) => const RegisterScreen()),
-                        );
-                      } else {
-                        showEnterPinDialog();
-                      }
-                    },
-                    child: const Text(
-                      "Set / Change PIN",
-                      style: TextStyle(
-                        color: Color(0xFFB03A75),
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 10),
-                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
               ),
             ),
           ),
-        ),
+
+          // Blur overlay for glow effect (same style as splash)
+          Positioned.fill(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+              child: Container(color: Colors.transparent),
+            ),
+          ),
+
+          // -------------------------------------------------------
+          // LOGIN CARD
+          // -------------------------------------------------------
+          FadeTransition(
+            opacity: _fade,
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                width: screenWidth < 500 ? screenWidth * 0.9 : 380,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.85),
+                  borderRadius: BorderRadius.circular(22),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.07),
+                      blurRadius: 12,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      "Enter PIN",
+                      style: TextStyle(
+                        color: Color(0xFFB03A75),
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+
+                    const SizedBox(height: 6),
+
+                    const Text(
+                      "Unlock your MyDiary",
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.black54,
+                      ),
+                    ),
+
+                    const SizedBox(height: 22),
+
+                    // ---------------------------------------------------
+                    // PIN TEXTFIELD
+                    // ---------------------------------------------------
+                    TextField(
+                      controller: passwordController,
+                      obscureText: !passwordVisible,
+                      keyboardType: TextInputType.number,
+                      maxLength: 6,
+                      textAlign: TextAlign.center,
+                      decoration: InputDecoration(
+                        counterText: "",
+                        filled: true,
+                        fillColor: Colors.white,
+                        hintText: "Enter 6-digit PIN",
+                        hintStyle: TextStyle(color: Colors.grey.shade500),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            passwordVisible
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                            color: Color(0xFFB03A75),
+                          ),
+                          onPressed: () {
+                            setState(() => passwordVisible = !passwordVisible);
+                          },
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(color: Colors.pink.shade200),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    // ---------------------------------------------------
+                    // REMEMBER ME
+                    // ---------------------------------------------------
+                    Row(
+                      children: [
+                        const Text(
+                          "Remember Me",
+                          style: TextStyle(color: Colors.black87),
+                        ),
+                        const Spacer(),
+                        Checkbox(
+                          value: isCheck,
+                          activeColor: Colors.pinkAccent,
+                          onChanged: (value) async {
+                            if (value == true &&
+                                passwordController.text.length < 6) {
+                              showMessage("Enter 6-digit PIN first!");
+                              return;
+                            }
+
+                            final prefs =
+                                await SharedPreferences.getInstance();
+                            prefs.setBool('remember', value!);
+
+                            if (!value) {
+                              passwordController.clear();
+                            }
+
+                            setState(() => isCheck = value);
+                          },
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // ---------------------------------------------------
+                    // UNLOCK BUTTON
+                    // ---------------------------------------------------
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFB03A75),
+                          foregroundColor: Colors.white,
+                          elevation: 2,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        onPressed: _handleLogin,
+                        child: const Text(
+                          "Unlock",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 17,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // ---------------------------------------------------
+                    // SET / CHANGE PIN
+                    // ---------------------------------------------------
+                    GestureDetector(
+                      onTap: () {
+                        if (password.isEmpty) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => const RegisterScreen()),
+                          );
+                        } else {
+                          showEnterPinDialog();
+                        }
+                      },
+                      child: const Text(
+                        "Set / Change PIN",
+                        style: TextStyle(
+                          color: Color(0xFFB03A75),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 10),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -285,7 +305,9 @@ class _LoginScreenState extends State<LoginScreen>
         .showSnackBar(SnackBar(content: Text(msg)));
   }
 
-  // PIN Verification Dialog
+  // -----------------------------------------------------
+  // ENTER PIN DIALOG
+  // -----------------------------------------------------
   void showEnterPinDialog() {
     TextEditingController pinController = TextEditingController();
     bool visible = false;
@@ -293,7 +315,7 @@ class _LoginScreenState extends State<LoginScreen>
     showDialog(
       context: context,
       builder: (context) {
-        return StatefulBuilder(builder: (context, setStateDialog) {
+        return StatefulBuilder(builder: (context, setDialog) {
           return AlertDialog(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(18),
@@ -310,9 +332,7 @@ class _LoginScreenState extends State<LoginScreen>
                 suffixIcon: IconButton(
                   icon: Icon(
                       visible ? Icons.visibility : Icons.visibility_off),
-                  onPressed: () {
-                    setStateDialog(() => visible = !visible);
-                  },
+                  onPressed: () => setDialog(() => visible = !visible),
                 ),
               ),
             ),

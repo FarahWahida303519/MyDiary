@@ -49,13 +49,12 @@ class _RegisterScreenState extends State<RegisterScreen>
         width: double.infinity,
         height: double.infinity,
 
-        // 🌸 Pastel Pink Gradient
+        // 🌈 Updated Theme: Pink → Blue
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Color(0xFFFDE2F3),
-              Color(0xFFF7D4EC),
-              Color(0xFFEEC7E7),
+              Color(0xFFFCE1F3), // pink
+              Color(0xFFD2E4FF), // soft blue
             ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -69,7 +68,6 @@ class _RegisterScreenState extends State<RegisterScreen>
               width: width < 500 ? width * 0.9 : 380,
               padding: const EdgeInsets.all(22),
 
-              // 🌸 Soft White Card
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.75),
                 borderRadius: BorderRadius.circular(22),
@@ -86,7 +84,6 @@ class _RegisterScreenState extends State<RegisterScreen>
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Title
                   const Text(
                     "Set New PIN",
                     style: TextStyle(
@@ -108,7 +105,6 @@ class _RegisterScreenState extends State<RegisterScreen>
 
                   const SizedBox(height: 25),
 
-                  // PIN Field
                   TextField(
                     controller: passwordController,
                     obscureText: !passwordVisible,
@@ -150,7 +146,6 @@ class _RegisterScreenState extends State<RegisterScreen>
 
                   const SizedBox(height: 18),
 
-                  // Save Button
                   SizedBox(
                     width: double.infinity,
                     height: 52,
@@ -206,9 +201,7 @@ class _RegisterScreenState extends State<RegisterScreen>
     );
   }
 
-  // -------------------------------------------------------------------
-  // SAVE PIN LOGIC
-  // -------------------------------------------------------------------
+  // SAVE PIN LOGIC  
   Future<void> savePin() async {
     String pin = passwordController.text.trim();
 
