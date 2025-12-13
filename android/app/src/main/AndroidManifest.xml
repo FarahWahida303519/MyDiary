@@ -1,8 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="mydiary"
-        android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+    android:label="My Diary"
+    android:name="${applicationName}"
+    android:icon="@mipmap/ic_launcher">
 
         <!-- IMPORTANT: Add UCrop Activity HERE -->
         <activity
