@@ -16,10 +16,11 @@ class _MainScreenState extends State<MainScreen> {
 
   int curpageno = 1;
   int limit = 5;
-  int pages = 1;
-
   String status = "Loading...";
-  bool isSearching = false; // ⭐ important flag
+
+  // TO SEARCH STATE
+  bool isSearching = false;
+  String lastSearchKeyword = "";
 
   @override
   void initState() {
@@ -57,7 +58,8 @@ class _MainScreenState extends State<MainScreen> {
 
         child: Column(
           children: [
-            // ================= HEADER =================
+
+            //THE HEADER
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 60, 20, 20),
               child: Column(
@@ -81,7 +83,7 @@ class _MainScreenState extends State<MainScreen> {
                   ),
                   const SizedBox(height: 18),
 
-                  // ================= SEARCH BAR =================
+                  // SEARCH BAR 
                   GestureDetector(
                     onTap: showSearchDialog,
                     child: Container(
@@ -116,31 +118,24 @@ class _MainScreenState extends State<MainScreen> {
                     ),
                   ),
 
-                  // ================= BACK TO LIST =================
+                  // go back to menu
                   if (isSearching)
                     Padding(
-                      padding: const EdgeInsets.only(top: 10),
+                      padding: const EdgeInsets.only(top: 8),
                       child: GestureDetector(
-                        onTap: () async {
-                          isSearching = false;
-                          await loadData();
+                        onTap: () {
+                          setState(() {
+                            isSearching = false;
+                            lastSearchKeyword = "";
+                          });
+                          loadData();
                         },
-                        child: Row(
-                          children: const [
-                            Icon(
-                              Icons.arrow_back,
-                              size: 18,
-                              color: Color(0xFFB03A75),
-                            ),
-                            SizedBox(width: 6),
-                            Text(
-                              "Back to all entries",
-                              style: TextStyle(
-                                color: Color(0xFFB03A75),
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
+                        child: const Text(
+                          "← Back ",
+                          style: TextStyle(
+                            color: Color(0xFFB03A75),
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ),
@@ -148,37 +143,10 @@ class _MainScreenState extends State<MainScreen> {
               ),
             ),
 
-            // ================= LIST =================
+            // List
             Expanded(
               child: diarList.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.menu_book_rounded,
-                            size: 90,
-                            color: Colors.pink.shade200,
-                          ),
-                          const SizedBox(height: 20),
-                          Text(
-                            status,
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFFB03A75),
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            "Tap + to start writing 💗",
-                            style: TextStyle(
-                              color: Colors.black.withOpacity(0.5),
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
+                  ? _emptyState()
                   : ListView.builder(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       itemCount: diarList.length,
@@ -215,17 +183,14 @@ class _MainScreenState extends State<MainScreen> {
                                 child: Padding(
                                   padding: const EdgeInsets.all(14),
                                   child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       ClipRRect(
-                                        borderRadius:
-                                            BorderRadius.circular(14),
+                                        borderRadius: BorderRadius.circular(14),
                                         child: SizedBox(
                                           width: 70,
                                           height: 70,
-                                          child:
-                                              _loadImage(item.imagename),
+                                          child: _loadImage(item.imagename),
                                         ),
                                       ),
 
@@ -247,8 +212,7 @@ class _MainScreenState extends State<MainScreen> {
                                                   decoration: BoxDecoration(
                                                     color: Colors.pink.shade50,
                                                     borderRadius:
-                                                        BorderRadius.circular(
-                                                            20),
+                                                        BorderRadius.circular(20),
                                                   ),
                                                   child: Text(
                                                     item.date,
@@ -266,8 +230,7 @@ class _MainScreenState extends State<MainScreen> {
                                                   icon: const Icon(
                                                     Icons.edit,
                                                     size: 18,
-                                                    color:
-                                                        Color(0xFFB03A75),
+                                                    color: Color(0xFFB03A75),
                                                   ),
                                                   onPressed: () async {
                                                     await Navigator.push(
@@ -277,8 +240,7 @@ class _MainScreenState extends State<MainScreen> {
                                                             const NewItemScreen(),
                                                         settings:
                                                             RouteSettings(
-                                                                arguments:
-                                                                    item),
+                                                                arguments: item),
                                                       ),
                                                     );
                                                     loadData();
@@ -301,24 +263,19 @@ class _MainScreenState extends State<MainScreen> {
                                             Text(
                                               item.title,
                                               maxLines: 1,
-                                              overflow:
-                                                  TextOverflow.ellipsis,
+                                              overflow: TextOverflow.ellipsis,
                                               style: const TextStyle(
                                                 fontSize: 17,
-                                                fontWeight:
-                                                    FontWeight.bold,
+                                                fontWeight: FontWeight.bold,
                                               ),
                                             ),
 
                                             const SizedBox(height: 4),
 
                                             Text(
-                                              item.description.isEmpty
-                                                  ? "No description"
-                                                  : item.description,
+                                              item.description,
                                               maxLines: 2,
-                                              overflow:
-                                                  TextOverflow.ellipsis,
+                                              overflow: TextOverflow.ellipsis,
                                               style: TextStyle(
                                                 fontSize: 14,
                                                 color: Colors.black
@@ -344,7 +301,36 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  // ================= IMAGE =================
+  // IF NOT FOUND DIARY IN THE LIST/DB
+  Widget _emptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.menu_book_rounded,
+              size: 90, color: Colors.pink.shade200),
+          const SizedBox(height: 20),
+          Text(
+            isSearching ? "No diary found" : status,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFFB03A75),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            isSearching
+                ? "No result for \"$lastSearchKeyword\""
+                : "Tap + to start writing 💗",
+            style: TextStyle(color: Colors.black.withOpacity(0.5)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // SET THE IMAGE
   Widget _loadImage(String imagename) {
     if (imagename == "NA") {
       return Container(
@@ -353,26 +339,27 @@ class _MainScreenState extends State<MainScreen> {
       );
     }
 
-    final File file = File(imagename);
-    if (file.existsSync()) {
-      return Image.file(file, fit: BoxFit.cover);
-    } else {
-      return Container(
-        color: Colors.grey.shade200,
-        child: const Icon(Icons.broken_image, color: Colors.grey),
-      );
-    }
+    final file = File(imagename);
+    return file.existsSync()
+        ? Image.file(file, fit: BoxFit.cover)
+        : const Icon(Icons.broken_image);
   }
 
-  // ================= LOAD DATA =================
+  // LOAD THE DATA
   Future<void> loadData() async {
-    isSearching = false;
+    setState(() {
+      status = "Loading...";
+      diarList = [];
+    });
+
     diarList = await DatabaseHelper()
         .getMyListsPaginated(limit, (curpageno - 1) * limit);
+
+    if (diarList.isEmpty) status = "No diary yet";
     setState(() {});
   }
 
-  // ================= DELETE =================
+  // DELETE THE DIARY FROM LIST AND DB
   void deleteDialog(int id) {
     showDialog(
       context: context,
@@ -385,9 +372,7 @@ class _MainScreenState extends State<MainScreen> {
             child: const Text("Cancel"),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-            ),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             onPressed: () async {
               await DatabaseHelper().deleteMyList(id);
               if (context.mounted) Navigator.pop(context);
@@ -400,7 +385,7 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  // ================= SEARCH =================
+  //SEARCH THE DIARY
   void showSearchDialog() {
     TextEditingController searchController = TextEditingController();
 
@@ -421,10 +406,16 @@ class _MainScreenState extends State<MainScreen> {
           ),
           ElevatedButton(
             onPressed: () async {
-              diarList = await DatabaseHelper()
-                  .searchMyList(searchController.text.trim());
-              isSearching = true;
-              setState(() {});
+              final keyword = searchController.text.trim();
+
+              diarList =
+                  await DatabaseHelper().searchMyList(keyword);
+
+              setState(() {
+                isSearching = true;
+                lastSearchKeyword = keyword;
+              });
+
               Navigator.pop(context);
             },
             child: const Text("Search"),

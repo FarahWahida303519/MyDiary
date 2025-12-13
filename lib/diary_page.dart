@@ -27,7 +27,7 @@ class _NewItemScreenState extends State<NewItemScreen> {
 
   final List<String> emojiList = [
     "😀","😊","🥰","😍","😎","😢","😭","😡",
-    "😴","🤔","😇","🥳","😌","😔","😤","🤍"
+    "😴","🤔","😇","🥳","😌","😔","😤"
   ];
 
   @override
@@ -54,7 +54,7 @@ class _NewItemScreenState extends State<NewItemScreen> {
     }
   }
 
-  // ================= DATE PICKER =================
+  // SET DATE PICKER
   Future<void> pickDate() async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -68,7 +68,7 @@ class _NewItemScreenState extends State<NewItemScreen> {
     }
   }
 
-  // ================= EMOJI PICKER =================
+  // SET EMOJI PICKER
   void showEmojiPicker() {
     showModalBottomSheet(
       context: context,
@@ -120,7 +120,7 @@ class _NewItemScreenState extends State<NewItemScreen> {
           child: Column(
             children: [
 
-              // ================= HEADER =================
+              // THE HEADER
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 child: Row(
@@ -154,7 +154,7 @@ class _NewItemScreenState extends State<NewItemScreen> {
                 ),
               ),
 
-              // ================= CONTENT =================
+              // THE CONTENT
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.symmetric(horizontal: 18),
@@ -292,7 +292,7 @@ class _NewItemScreenState extends State<NewItemScreen> {
     );
   }
 
-  // ================= CONFIRM SAVE / UPDATE =================
+  //CONFRIMATION TO SAVE OR UPDATE
   void showConfirmDialog() {
     if (titleController.text.trim().isEmpty ||
         descriptionController.text.trim().isEmpty) {
@@ -333,7 +333,7 @@ class _NewItemScreenState extends State<NewItemScreen> {
     );
   }
 
-  // ================= SAVE =================
+  // SAVE
   Future<void> saveItem() async {
     Directory dir = await getApplicationDocumentsDirectory();
     String imagePath = editDiary?.imagename ?? "NA";
@@ -380,7 +380,7 @@ class _NewItemScreenState extends State<NewItemScreen> {
     }
   }
 
-  // ================= IMAGE PICKER =================
+  // SET IMAGE PICKER
   void selectCameraGalleryDialog() {
     showModalBottomSheet(
       context: context,

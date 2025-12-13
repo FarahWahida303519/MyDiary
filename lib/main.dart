@@ -25,10 +25,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// ----------------------------------------------------------------------
-//  SPLASH SCREEN WITH PINK → BLUE GRADIENT
-// ----------------------------------------------------------------------
-
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 

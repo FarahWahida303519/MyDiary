@@ -50,7 +50,7 @@ class _RegisterScreenState extends State<RegisterScreen>
         width: double.infinity,
         height: double.infinity,
 
-        // 🌸 Same gradient theme (unchanged)
+        // THE THEME
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
@@ -121,7 +121,7 @@ class _RegisterScreenState extends State<RegisterScreen>
 
                   const SizedBox(height: 26),
 
-                  // 🔐 PIN FIELD
+                  // FIELD OF PIN
                   TextField(
                     controller: passwordController,
                     obscureText: !passwordVisible,
@@ -181,7 +181,7 @@ class _RegisterScreenState extends State<RegisterScreen>
 
                   const SizedBox(height: 20),
 
-                  // 💾 SAVE BUTTON
+                  // SAVE 
                   SizedBox(
                     width: double.infinity,
                     height: 54,
@@ -207,7 +207,7 @@ class _RegisterScreenState extends State<RegisterScreen>
 
                   const SizedBox(height: 18),
 
-                  // 🔙 BACK TO LOGIN
+                  //  BACK TO LOGIN
                   GestureDetector(
                     onTap: () {
                       Navigator.pushReplacement(
@@ -236,7 +236,7 @@ class _RegisterScreenState extends State<RegisterScreen>
     );
   }
 
-  // ================= SAVE PIN LOGIC (UNCHANGED) =================
+  // SAVE PIN
   Future<void> savePin() async {
     String pin = passwordController.text.trim();
 
