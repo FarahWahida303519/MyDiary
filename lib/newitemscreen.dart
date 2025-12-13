@@ -4,7 +4,7 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:mydiary/databasehelper.dart';
-import 'package:mydiary/mylist.dart';
+import 'package:mydiary/diarylistdata.dart';
 import 'package:path_provider/path_provider.dart';
 
 class NewItemScreen extends StatefulWidget {
@@ -16,286 +16,318 @@ class NewItemScreen extends StatefulWidget {
 
 class _NewItemScreenState extends State<NewItemScreen> {
   File? image;
+  DiaryListData? editDiary;
+
+  DateTime selectedDate = DateTime.now();
+  String selectedEmoji = "🙂";
 
   final TextEditingController titleController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   final DateFormat formatter = DateFormat('dd MMM yyyy');
 
+  final List<String> emojiList = [
+    "😀","😊","🥰","😍","😎","😢","😭","😡",
+    "😴","🤔","😇","🥳","😌","😔","😤","🤍"
+  ];
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    final args = ModalRoute.of(context)?.settings.arguments;
+    if (args != null && args is DiaryListData && editDiary == null) {
+      editDiary = args;
+
+      if (args.title.isNotEmpty && emojiList.contains(args.title[0])) {
+        selectedEmoji = args.title[0];
+        titleController.text = args.title.substring(2);
+      } else {
+        titleController.text = args.title;
+      }
+
+      descriptionController.text = args.description;
+      selectedDate = formatter.parse(args.date);
+
+      if (args.imagename != "NA") {
+        image = File(args.imagename);
+      }
+    }
+  }
+
+  // ================= DATE PICKER =================
+  Future<void> pickDate() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime.now(),
+      builder: (context, child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: Color(0xFFE06092),
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      setState(() => selectedDate = picked);
+    }
+  }
+
+  // ================= EMOJI PICKER =================
+  void showEmojiPicker() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(20),
+          child: GridView.count(
+            crossAxisCount: 4,
+            shrinkWrap: true,
+            children: emojiList.map((emoji) {
+              return GestureDetector(
+                onTap: () {
+                  setState(() => selectedEmoji = emoji);
+                  Navigator.pop(context);
+                },
+                child: Center(
+                  child: Text(
+                    emoji,
+                    style: const TextStyle(fontSize: 32),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFCE9F3), // soft diary pink
+      resizeToAvoidBottomInset: true,
+      backgroundColor: const Color(0xFFFCE9F3),
       body: SafeArea(
         child: Column(
           children: [
-            // ================== TOP BAR ==================
+            // ================= HEADER =================
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Row(
                 children: [
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: const Icon(Icons.arrow_back,
-                        size: 26, color: Colors.black87),
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: () => Navigator.pop(context),
                   ),
                   const Spacer(),
-
-                  // More options (dummy)
-                  const Icon(Icons.more_vert, color: Colors.black87),
-
-                  const SizedBox(width: 12),
-
-                  // SAVE BUTTON (TOP RIGHT)
-                  ElevatedButton(
-                    onPressed: showConfirmDialog,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFE06092),
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 18, vertical: 10),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
+                  const Text(
+                    "My Diary",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
                     ),
+                  ),
+                  const Spacer(),
+                  TextButton(
+                    onPressed: showConfirmDialog,
                     child: const Text(
                       "SAVE",
                       style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white),
+                        color: Color(0xFFE06092),
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
 
-            // ================== DIARY CONTENT ==================
+            // ================= CONTENT =================
             Expanded(
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // ========== DATE DISPLAY ==========
-                      Row(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 18),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // ========== DATE CARD ==========
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 24),
+                      padding: const EdgeInsets.all(18),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(22),
+                      ),
+                      child: Row(
                         children: [
                           Text(
-                            DateFormat("dd")
-                                .format(DateTime.now()), // day bold
+                            DateFormat("dd").format(selectedDate),
                             style: const TextStyle(
-                              fontSize: 36,
+                              fontSize: 40,
                               fontWeight: FontWeight.bold,
-                              color: Colors.black,
                             ),
                           ),
-                          const SizedBox(width: 6),
+                          const SizedBox(width: 14),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                DateFormat("MMM yyyy")
-                                    .format(DateTime.now()),
+                                DateFormat("EEEE").format(selectedDate),
                                 style: const TextStyle(
                                   fontSize: 16,
-                                  color: Colors.black87,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              Text(
+                                DateFormat("MMM yyyy").format(selectedDate),
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.black54,
                                 ),
                               ),
                             ],
                           ),
                           const Spacer(),
 
-                          // EMOJI (optional but shown in UI)
-                          const Icon(Icons.emoji_emotions_outlined,
-                              color: Colors.black54, size: 28),
+                          // 🔹 Calendar icon cue
+                          IconButton(
+                            icon: const Icon(
+                              Icons.calendar_month,
+                              color: Colors.black54,
+                            ),
+                            onPressed: pickDate,
+                          ),
+
+                          // 🔹 Emoji picker
+                          GestureDetector(
+                            onTap: showEmojiPicker,
+                            child: Text(
+                              selectedEmoji,
+                              style: const TextStyle(fontSize: 28),
+                            ),
+                          ),
                         ],
                       ),
+                    ),
 
-                      const SizedBox(height: 15),
-
-                      // ========== TITLE ==========
-                      TextField(
-                        controller: titleController,
-                        style: const TextStyle(
-                          fontSize: 20,
-                          color: Colors.black87,
-                          fontWeight: FontWeight.w500,
-                        ),
-                        decoration: const InputDecoration(
-                          hintText: "Title",
-                          hintStyle: TextStyle(
-                              fontSize: 20, color: Colors.black45),
-                          border: InputBorder.none,
-                        ),
+                    // ========== TITLE ==========
+                    TextField(
+                      controller: titleController,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
                       ),
-
-                      const SizedBox(height: 15),
-
-                      // ========== DESCRIPTION ==========
-                      TextField(
-                        controller: descriptionController,
-                        maxLines: null,
-                        style: const TextStyle(
-                            fontSize: 17, color: Colors.black87),
-                        decoration: const InputDecoration(
-                          hintText: "Write more here...",
-                          hintStyle:
-                              TextStyle(fontSize: 17, color: Colors.black38),
-                          border: InputBorder.none,
-                        ),
+                      decoration: const InputDecoration(
+                        hintText: "Title of the day...",
+                        border: InputBorder.none,
                       ),
+                    ),
 
-                      const SizedBox(height: 20),
+                    const SizedBox(height: 10),
 
-                      // ========== IMAGE PICKER (CLICK TO ADD) ==========
-                      GestureDetector(
-                        onTap: selectCameraGalleryDialog,
-                        child: Container(
-                          height: 180,
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.6),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                                color: Colors.black26, width: 1.2),
-                          ),
-                          child: image == null
-                              ? Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: const [
-                                    Icon(Icons.camera_alt_rounded,
-                                        size: 38, color: Colors.black54),
-                                    SizedBox(height: 8),
-                                    Text(
-                                      "Tap to add image",
-                                      style: TextStyle(
-                                          color: Colors.black54, fontSize: 14),
-                                    ),
-                                  ],
-                                )
-                              : ClipRRect(
-                                  borderRadius: BorderRadius.circular(16),
-                                  child: Image.file(
-                                    image!,
-                                    width: double.infinity,
-                                    fit: BoxFit.cover,
-                                  ),
+                    // ========== CONTENT ==========
+                    TextField(
+                      controller: descriptionController,
+                      maxLines: null,
+                      keyboardType: TextInputType.multiline,
+                      style: const TextStyle(fontSize: 16, height: 1.6),
+                      decoration: const InputDecoration(
+                        hintText:
+                            "Write your thoughts here\nThis is your safe space 💗",
+                        border: InputBorder.none,
+                      ),
+                    ),
+
+                    const SizedBox(height: 30),
+
+                    // ========== IMAGE ==========
+                    const Text(
+                      "Memory Photo",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+
+                    GestureDetector(
+                      onTap: selectCameraGalleryDialog,
+                      child: Container(
+                        height: 180,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: Colors.black26),
+                        ),
+                        child: image == null
+                            ? Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: const [
+                                  Icon(Icons.camera_alt_rounded,
+                                      size: 36, color: Colors.black54),
+                                  SizedBox(height: 10),
+                                  Text("Tap to add a memory photo"),
+                                ],
+                              )
+                            : ClipRRect(
+                                borderRadius: BorderRadius.circular(20),
+                                child: Image.file(
+                                  image!,
+                                  fit: BoxFit.cover,
+                                  width: double.infinity,
                                 ),
-                        ),
+                              ),
                       ),
+                    ),
 
-                      const SizedBox(height: 40),
-                    ],
-                  ),
+                    const SizedBox(height: 40),
+                  ],
                 ),
               ),
             ),
-
-            // ================== BOTTOM TOOLBAR (LOOK ONLY) ==================
-            Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.85),
-                boxShadow: [
-                  BoxShadow(
-                      color: Colors.black.withOpacity(0.1), blurRadius: 5)
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
-                  Icon(Icons.brush_outlined),
-                  Icon(Icons.image_outlined),
-                  Icon(Icons.star_border),
-                  Icon(Icons.emoji_emotions_outlined),
-                  Icon(Icons.text_fields_outlined),
-                  Icon(Icons.format_list_bulleted_rounded),
-                  Icon(Icons.label_outline),
-                  Icon(Icons.mic_none_rounded),
-                ],
-              ),
-            )
           ],
         ),
       ),
     );
   }
 
-  // ===================== PICKER SHEET =====================
+  // ================= IMAGE PICKER =================
   void selectCameraGalleryDialog() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (context) {
         return Padding(
-          padding: const EdgeInsets.all(22),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+          padding: const EdgeInsets.all(24),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              const Text("Choose Image Source",
-                  style: TextStyle(
-                      fontSize: 20, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 20),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pop(context);
-                      openCamera();
-                    },
-                    child: Column(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFE06092).withOpacity(0.18),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: const Icon(Icons.camera_alt_rounded,
-                              color: Color(0xFFE06092), size: 40),
-                        ),
-                        const SizedBox(height: 6),
-                        const Text("Camera")
-                      ],
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pop(context);
-                      openGallery();
-                    },
-                    child: Column(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFE06092).withOpacity(0.18),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: const Icon(Icons.photo_library_rounded,
-                              color: Color(0xFFE06092), size: 40),
-                        ),
-                        const SizedBox(height: 6),
-                        const Text("Gallery"),
-                      ],
-                    ),
-                  ),
-                ],
+              IconButton(
+                icon: const Icon(Icons.camera_alt_rounded, size: 36),
+                onPressed: () {
+                  Navigator.pop(context);
+                  openCamera();
+                },
               ),
-
-              const SizedBox(height: 20),
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text("Cancel",
-                    style: TextStyle(color: Colors.black54)),
-              )
+              IconButton(
+                icon: const Icon(Icons.photo_library_rounded, size: 36),
+                onPressed: () {
+                  Navigator.pop(context);
+                  openGallery();
+                },
+              ),
             ],
           ),
         );
@@ -303,145 +335,100 @@ class _NewItemScreenState extends State<NewItemScreen> {
     );
   }
 
-  // ===================== CAMERA =====================
   Future<void> openCamera() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(
-        source: ImageSource.camera, maxHeight: 900);
-
-    if (pickedFile != null) {
-      image = File(pickedFile.path);
+    final picked = await ImagePicker().pickImage(source: ImageSource.camera);
+    if (picked != null) {
+      image = File(picked.path);
       cropImage();
     }
   }
 
-  // ===================== GALLERY =====================
   Future<void> openGallery() async {
-    final pickedFile =
-        await ImagePicker().pickImage(source: ImageSource.gallery);
-
-    if (pickedFile != null) {
-      image = File(pickedFile.path);
+    final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (picked != null) {
+      image = File(picked.path);
       cropImage();
     }
   }
 
-  // ===================== CROP IMAGE =====================
   Future<void> cropImage() async {
-    CroppedFile? cropped = await ImageCropper().cropImage(
+    final cropped = await ImageCropper().cropImage(
       sourcePath: image!.path,
       aspectRatio: const CropAspectRatio(ratioX: 5, ratioY: 3),
-      uiSettings: [
-        AndroidUiSettings(
-          toolbarTitle: "Crop Image",
-          toolbarColor: const Color(0xFFE06092),
-          toolbarWidgetColor: Colors.white,
-        ),
-        IOSUiSettings(title: "Crop Image")
-      ],
     );
-
     if (cropped != null) {
-      image = File(cropped.path);
-      setState(() {});
+      setState(() => image = File(cropped.path));
     }
   }
 
-  // ===================== CONFIRM SAVE =====================
+  // ================= CONFIRM SAVE =================
   void showConfirmDialog() {
-    if (titleController.text.trim().isEmpty) {
+    if (titleController.text.trim().isEmpty ||
+        descriptionController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please enter a title.")),
+        const SnackBar(content: Text("Title and content cannot be empty.")),
       );
       return;
     }
 
     showDialog(
       context: context,
-      builder: (context) {
-        return Dialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-          child: Padding(
-            padding: const EdgeInsets.all(22),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                        color: const Color(0xFFE06092).withOpacity(0.2),
-                        shape: BoxShape.circle),
-                    child: const Icon(Icons.save_rounded,
-                        size: 36, color: Color(0xFFE06092))),
-                const SizedBox(height: 15),
-                const Text("Confirm Save",
-                    style:
-                        TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 10),
-                const Text("Save this diary entry?",
-                    style: TextStyle(fontSize: 15)),
-                const SizedBox(height: 20),
-
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.pop(context),
-                        style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: Color(0xFFE06092))),
-                        child: const Text("Cancel",
-                            style: TextStyle(color: Color(0xFFE06092))),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                          saveItem();
-                        },
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFE06092)),
-                        child: const Text("Save",
-                            style: TextStyle(color: Colors.white)),
-                      ),
-                    ),
-                  ],
-                )
-              ],
-            ),
+      builder: (context) => AlertDialog(
+        title: const Text("Save Diary"),
+        content: const Text("Save this diary entry?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
           ),
-        );
-      },
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              saveItem();
+            },
+            child: const Text("Confirm"),
+          ),
+        ],
+      ),
     );
   }
 
-  // ===================== SAVE TO DATABASE =====================
+  // ================= SAVE =================
   Future<void> saveItem() async {
-    Directory appDir = await getApplicationDocumentsDirectory();
-    String storedImagePath = "NA";
+    Directory dir = await getApplicationDocumentsDirectory();
+    String imagePath = editDiary?.imagename ?? "NA";
 
     if (image != null) {
-      String imageName = "${DateTime.now().millisecondsSinceEpoch}.png";
-      storedImagePath = "${appDir.path}/$imageName";
-      await image!.copy(storedImagePath);
+      String name = "${DateTime.now().millisecondsSinceEpoch}.png";
+      imagePath = "${dir.path}/$name";
+      await image!.copy(imagePath);
     }
 
-    await DatabaseHelper().insertMyList(
-      MyList(
-        0,
-        titleController.text,
-        descriptionController.text,
-        "Pending",
-        formatter.format(DateTime.now()),
-        storedImagePath,
-      ),
-    );
+    final String finalTitle =
+        "$selectedEmoji ${titleController.text.trim()}";
+
+    if (editDiary == null) {
+      await DatabaseHelper().insertMyList(
+        DiaryListData(
+          0,
+          finalTitle,
+          descriptionController.text.trim(),
+          "Pending",
+          formatter.format(selectedDate),
+          imagePath,
+        ),
+      );
+    } else {
+      editDiary!.title = finalTitle;
+      editDiary!.description = descriptionController.text.trim();
+      editDiary!.date = formatter.format(selectedDate);
+      editDiary!.imagename = imagePath;
+      await DatabaseHelper().updateMyList(editDiary!);
+    }
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Entry saved successfully")),
+        const SnackBar(content: Text("Diary saved 💗")),
       );
       Navigator.pop(context);
     }

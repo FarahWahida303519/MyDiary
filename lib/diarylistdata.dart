@@ -1,4 +1,4 @@
-class MyList {
+class DiaryListData {
   int id;
   String title;
   String description;
@@ -6,7 +6,7 @@ class MyList {
   String date;
   String imagename;
 
-  MyList(
+  DiaryListData(
     this.id,
     this.title,
     this.description,
@@ -14,6 +14,7 @@ class MyList {
     this.date,
     this.imagename,
   );
+
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -25,14 +26,14 @@ class MyList {
     };
   }
 
-  factory MyList.fromMap(Map<String, dynamic> map) {
-    return MyList(
-      map['id'],
-      map['title'],
-      map['description'],
-      map['status'],
-      map['date'],
-      map['imagename'],
+  factory DiaryListData.fromMap(Map<String, dynamic> map) {
+    return DiaryListData(
+      map['id'] as int,
+      map['title'] as String,
+      map['description'] as String,
+      map['status'] as String,
+      map['date'] as String,
+      map['imagename'] as String,
     );
   }
 }

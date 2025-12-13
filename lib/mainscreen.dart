@@ -1,8 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:mydiary/databasehelper.dart';
-import 'package:mydiary/loginscreen.dart';
-import 'package:mydiary/mylist.dart';
+import 'package:mydiary/diarylistdata.dart';
 import 'package:mydiary/newitemscreen.dart';
 
 class MainScreen extends StatefulWidget {
@@ -13,7 +12,7 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  List<MyList> mylist = [];
+  List<DiaryListData> diarList = [];
   int curpageno = 1;
   int limit = 5;
   int pages = 1;
@@ -67,29 +66,12 @@ class _MainScreenState extends State<MainScreen> {
                 Stack(
                   alignment: Alignment.center,
                   children: [
-                    // Center Title
                     const Text(
                       "My Diary Entries",
                       style: TextStyle(
                         color: Colors.black87,
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
-                      ),
-                    ),
-
-                    // Right side buttons
-                    Positioned(
-                      right: 50,
-                      child: IconButton(
-                        icon: const Icon(Icons.exit_to_app, color: Colors.black87),
-                        onPressed: () => showLogoutDialog(),
-                      ),
-                    ),
-                    Positioned(
-                      right: 10,
-                      child: IconButton(
-                        icon: const Icon(Icons.info_outline, color: Colors.black87),
-                        onPressed: () => showAboutAndDonate(),
                       ),
                     ),
                   ],
@@ -119,17 +101,12 @@ class _MainScreenState extends State<MainScreen> {
                       const SizedBox(width: 8),
 
                       Expanded(
-                        child: GestureDetector(
+                        child: TextField(
+                          readOnly: true,
                           onTap: showSearchDialog,
-                          child: const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 14),
-                            child: Text(
-                              "Search diary entries...",
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.grey,
-                              ),
-                            ),
+                          decoration: const InputDecoration(
+                            hintText: "Search diary entries...",
+                            border: InputBorder.none,
                           ),
                         ),
                       ),
@@ -154,13 +131,16 @@ class _MainScreenState extends State<MainScreen> {
           // CONTENT LIST AREA
           // ==========================================================
           Expanded(
-            child: mylist.isEmpty
+            child: diarList.isEmpty
                 ? Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.menu_book_rounded,
-                            size: 90, color: Colors.pink.shade200),
+                        Icon(
+                          Icons.menu_book_rounded,
+                          size: 90,
+                          color: Colors.pink.shade200,
+                        ),
                         const SizedBox(height: 20),
                         Text(
                           status,
@@ -175,18 +155,19 @@ class _MainScreenState extends State<MainScreen> {
                           child: Text(
                             "Start writing your beautiful moments...",
                             style: TextStyle(
-                                fontSize: 14, color: Colors.grey.shade600),
+                              fontSize: 14,
+                              color: Colors.grey.shade600,
+                            ),
                           ),
-                        )
+                        ),
                       ],
                     ),
                   )
                 : ListView.builder(
                     padding: const EdgeInsets.all(15),
-                    itemCount: mylist.length,
+                    itemCount: diarList.length,
                     itemBuilder: (_, index) {
-                      final item = mylist[index];
-                      final isCompleted = item.status == "Completed";
+                      final item = diarList[index];
 
                       return Container(
                         margin: const EdgeInsets.only(bottom: 12),
@@ -241,8 +222,9 @@ class _MainScreenState extends State<MainScreen> {
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.grey.shade700),
+                                        fontSize: 14,
+                                        color: Colors.grey.shade700,
+                                      ),
                                     ),
                                     const SizedBox(height: 6),
                                     Text(
@@ -251,7 +233,7 @@ class _MainScreenState extends State<MainScreen> {
                                         fontSize: 12,
                                         color: Colors.grey.shade600,
                                       ),
-                                    )
+                                    ),
                                   ],
                                 ),
                               ),
@@ -264,23 +246,32 @@ class _MainScreenState extends State<MainScreen> {
                                   children: [
                                     IconButton(
                                       icon: const Icon(Icons.edit, size: 22),
-                                      onPressed: () => editItemDialog(item),
+                                      onPressed: () async {
+                                        await Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                const NewItemScreen(),
+                                            settings: RouteSettings(
+                                              arguments: item,
+                                            ),
+                                          ),
+                                        );
+                                        loadData(); // refresh list after update
+                                      },
                                     ),
                                     IconButton(
-                                      icon: const Icon(Icons.delete,
-                                          size: 22, color: Colors.red),
+                                      icon: const Icon(
+                                        Icons.delete,
+                                        size: 22,
+                                        color: Colors.red,
+                                      ),
                                       onPressed: () => deleteDialog(item.id),
                                     ),
                                   ],
                                 ),
-                                Checkbox(
-                                  value: isCompleted,
-                                  activeColor: Colors.pink,
-                                  onChanged: (val) =>
-                                      confirmDialogStatus(index, val!),
-                                )
                               ],
-                            )
+                            ),
                           ],
                         ),
                       );
@@ -289,7 +280,7 @@ class _MainScreenState extends State<MainScreen> {
           ),
 
           // =============== PAGE NAVIGATION ===============
-          if (mylist.isNotEmpty)
+          if (diarList.isNotEmpty)
             Padding(
               padding: const EdgeInsets.only(bottom: 12, top: 8),
               child: Row(
@@ -307,7 +298,9 @@ class _MainScreenState extends State<MainScreen> {
                   Text(
                     "Page $curpageno of $pages",
                     style: const TextStyle(
-                        fontSize: 14, fontWeight: FontWeight.bold),
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   IconButton(
                     icon: const Icon(Icons.arrow_forward_ios),
@@ -349,16 +342,16 @@ class _MainScreenState extends State<MainScreen> {
   Future<void> loadData() async {
     setState(() {
       status = "Loading...";
-      mylist = [];
+      diarList = [];
     });
 
     final total = await DatabaseHelper().getTotalCount();
     pages = (total / limit).ceil();
 
     int offset = (curpageno - 1) * limit;
-    mylist = await DatabaseHelper().getMyListsPaginated(limit, offset);
+    diarList = await DatabaseHelper().getMyListsPaginated(limit, offset);
 
-    if (mylist.isEmpty) status = "Not Available.";
+    if (diarList.isEmpty) status = "Not Available.";
     setState(() {});
   }
 
@@ -474,134 +467,9 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   // ---------------------------------------------------------
-  // UPDATE STATUS
-  // ---------------------------------------------------------
-  void confirmDialogStatus(int index, bool value) {
-    final MyList item = mylist[index];
-    final String newStatus = value ? "Completed" : "Pending";
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Container(
-            padding: const EdgeInsets.all(22),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              color: Colors.white,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // 🎨 Icon
-                Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE06092).withOpacity(0.12),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    value ? Icons.check_circle : Icons.pending_actions,
-                    size: 45,
-                    color: const Color(0xFFE06092),
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-
-                // 📝 Title
-                Text(
-                  "Update Status",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFFE06092),
-                  ),
-                ),
-
-                const SizedBox(height: 10),
-
-                // 📌 Message
-                Text(
-                  "Do you want to mark this task as $newStatus?",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 16, color: Colors.grey[700]),
-                ),
-
-                const SizedBox(height: 25),
-
-                // 🔘 Buttons Row
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Cancel button
-                    Expanded(
-                      child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFFE06092),
-                          side: const BorderSide(color: Color(0xFFE06092)),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                        ),
-                        child: const Text("Cancel"),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                    ),
-
-                    const SizedBox(width: 12),
-
-                    // Update button
-                    Expanded(
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFE06092),
-                          foregroundColor: Colors.white,
-                          elevation: 3,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                        ),
-                        child: const Text("Update"),
-                        onPressed: () async {
-                          Navigator.pop(context);
-
-                          // Update backend
-                          item.status = newStatus;
-                          await DatabaseHelper().updateMyList(item);
-
-                          // Refresh UI
-                          loadData();
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text("Status updated to $newStatus"),
-                              ),
-                            );
-                          }
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  // ---------------------------------------------------------
   // EDIT ITEM
   // ---------------------------------------------------------
-  void editItemDialog(MyList item) {
+  void editItemDialog(DiaryListData item) {
     TextEditingController titleController = TextEditingController(
       text: item.title,
     );
@@ -688,14 +556,20 @@ class _MainScreenState extends State<MainScreen> {
                         vertical: 8,
                       ),
                       decoration: BoxDecoration(
-                        color: isCompleted ? Colors.green[50] : Colors.orange[50],
+                        color: isCompleted
+                            ? Colors.green[50]
+                            : Colors.orange[50],
                         borderRadius: BorderRadius.circular(14),
                       ),
                       child: Row(
                         children: [
                           Icon(
-                            isCompleted ? Icons.check_circle : Icons.pending_outlined,
-                            color: isCompleted ? Colors.green[700] : Colors.orange[700],
+                            isCompleted
+                                ? Icons.check_circle
+                                : Icons.pending_outlined,
+                            color: isCompleted
+                                ? Colors.green[700]
+                                : Colors.orange[700],
                           ),
                           const SizedBox(width: 10),
                           Text(
@@ -703,7 +577,9 @@ class _MainScreenState extends State<MainScreen> {
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
-                              color: isCompleted ? Colors.green[700] : Colors.orange[700],
+                              color: isCompleted
+                                  ? Colors.green[700]
+                                  : Colors.orange[700],
                             ),
                           ),
                           const Spacer(),
@@ -756,7 +632,8 @@ class _MainScreenState extends State<MainScreen> {
                             }
 
                             item.title = titleController.text.trim();
-                            item.description = descriptionController.text.trim();
+                            item.description = descriptionController.text
+                                .trim();
                             item.status = isCompleted ? "Completed" : "Pending";
 
                             await DatabaseHelper().updateMyList(item);
@@ -781,7 +658,7 @@ class _MainScreenState extends State<MainScreen> {
   // ---------------------------------------------------------
   // DETAILS DIALOG
   // ---------------------------------------------------------
-  void showDetailsDialog(MyList item) {
+  void showDetailsDialog(DiaryListData item) {
     showDialog(
       context: context,
       builder: (context) {
@@ -831,7 +708,9 @@ class _MainScreenState extends State<MainScreen> {
                       _infoChip(
                         Icons.check_circle,
                         item.status,
-                        item.status == "Completed" ? Colors.green[700] : Colors.orange[700],
+                        item.status == "Completed"
+                            ? Colors.green[700]
+                            : Colors.orange[700],
                       ),
                       const SizedBox(width: 10),
                       _infoChip(
@@ -898,6 +777,11 @@ class _MainScreenState extends State<MainScreen> {
       context: context,
       builder: (context) {
         return Dialog(
+          insetPadding: EdgeInsets.only(
+            left: 20,
+            right: 20,
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(18),
           ),
@@ -982,165 +866,8 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void _performSearch(String keyword) async {
-    mylist = await DatabaseHelper().searchMyList(keyword.trim());
-    status = mylist.isEmpty ? "No task match your search." : "";
+    diarList = await DatabaseHelper().searchMyList(keyword.trim());
+    status = diarList.isEmpty ? "No task match your search." : "";
     setState(() {});
-  }
-
-  void showAboutAndDonate() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          title: const Text("About & Donate"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                "My Diary\nA simple and beautiful diary app.\n\n"
-                "If you find this app useful, consider supporting its development!",
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton.icon(
-                icon: const Icon(Icons.favorite),
-                label: const Text("Donate"),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFE06092),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                onPressed: () {},
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              child: const Text("Close"),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void showLogoutDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: true, // tap outside to dismiss
-      builder: (context) {
-        return Dialog(
-          insetPadding: const EdgeInsets.symmetric(
-            horizontal: 30,
-            vertical: 24,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(22),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // -------------------------------------------------------
-                // ICON
-                // -------------------------------------------------------
-                Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.red.withOpacity(0.12),
-                  ),
-                  child: const Icon(Icons.logout, size: 42, color: Colors.red),
-                ),
-
-                const SizedBox(height: 20),
-
-                // -------------------------------------------------------
-                // TITLE
-                // -------------------------------------------------------
-                const Text(
-                  "Logout?",
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-
-                const SizedBox(height: 12),
-
-                // -------------------------------------------------------
-                // MESSAGE
-                // -------------------------------------------------------
-                Text(
-                  "Are you sure you want to logout from My Diary?",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey[700],
-                    height: 1.4,
-                  ),
-                ),
-
-                const SizedBox(height: 26),
-
-                // -------------------------------------------------------
-                // BUTTONS
-                // -------------------------------------------------------
-                Row(
-                  children: [
-                    // CANCEL BUTTON
-                    Expanded(
-                      child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFFE06092),
-                          side: const BorderSide(color: Color(0xFFE06092)),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                        ),
-                        child: const Text("Cancel"),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                    ),
-
-                    const SizedBox(width: 12),
-
-                    // LOGOUT BUTTON
-                    Expanded(
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFE06092),
-                          foregroundColor: Colors.white,
-                          elevation: 2,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                        ),
-                        child: const Text("Logout"),
-                        onPressed: () {
-                          Navigator.pop(context); // close dialog first
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const LoginScreen(),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
   }
 }

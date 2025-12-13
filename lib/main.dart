@@ -239,7 +239,7 @@ class AskPasswordScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // YES → Register
+                      // YES,it will go to the Register screen
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFB03A75),
@@ -259,7 +259,7 @@ class AskPasswordScreen extends StatelessWidget {
 
                       const SizedBox(width: 20),
 
-                      // NO → MainScreen
+                      // NO,so it will go to MainScreen
                       OutlinedButton(
                         style: OutlinedButton.styleFrom(
                           foregroundColor: const Color(0xFFB03A75),
