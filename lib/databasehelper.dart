@@ -3,9 +3,9 @@ import 'package:path/path.dart';
 import 'package:mydiary/diarylistdata.dart';
 
 class DatabaseHelper {
-  static const _databaseName = "mylistv2.db";
+  static const _databaseName = "mydiary.db";
   static const _databaseVersion = 1;
-  static const tablename = 'tbl_mylist';
+  static const tablename = 'tb_diarydata';
 
   DatabaseHelper._internal();
   static final DatabaseHelper _instance = DatabaseHelper._internal();

@@ -61,20 +61,12 @@ class _NewItemScreenState extends State<NewItemScreen> {
       initialDate: selectedDate,
       firstDate: DateTime(2000),
       lastDate: DateTime.now(),
-      builder: (context, child) {
-        return Theme(
-          data: ThemeData.light().copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: Color(0xFFE06092),
-            ),
-          ),
-          child: child!,
-        );
-      },
     );
 
     if (picked != null) {
-      setState(() => selectedDate = picked);
+      setState(() {
+        selectedDate = picked;
+      });
     }
   }
 
@@ -82,9 +74,6 @@ class _NewItemScreenState extends State<NewItemScreen> {
   void showEmojiPicker() {
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
       builder: (context) {
         return Padding(
           padding: const EdgeInsets.all(20),
@@ -94,7 +83,9 @@ class _NewItemScreenState extends State<NewItemScreen> {
             children: emojiList.map((emoji) {
               return GestureDetector(
                 onTap: () {
-                  setState(() => selectedEmoji = emoji);
+                  setState(() {
+                    selectedEmoji = emoji;
+                  });
                   Navigator.pop(context);
                 },
                 child: Center(
@@ -114,11 +105,11 @@ class _NewItemScreenState extends State<NewItemScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: true,
       backgroundColor: const Color(0xFFFCE9F3),
       body: SafeArea(
         child: Column(
           children: [
+
             // ================= HEADER =================
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -126,12 +117,14 @@ class _NewItemScreenState extends State<NewItemScreen> {
                 children: [
                   IconButton(
                     icon: const Icon(Icons.arrow_back),
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
                   ),
                   const Spacer(),
-                  const Text(
-                    "My Diary",
-                    style: TextStyle(
+                  Text(
+                    editDiary == null ? "New Diary" : "Edit Diary",
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -139,9 +132,9 @@ class _NewItemScreenState extends State<NewItemScreen> {
                   const Spacer(),
                   TextButton(
                     onPressed: showConfirmDialog,
-                    child: const Text(
-                      "SAVE",
-                      style: TextStyle(
+                    child: Text(
+                      editDiary == null ? "SAVE" : "UPDATE",
+                      style: const TextStyle(
                         color: Color(0xFFE06092),
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -159,7 +152,8 @@ class _NewItemScreenState extends State<NewItemScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // ========== DATE CARD ==========
+
+                    // DATE + EMOJI
                     Container(
                       margin: const EdgeInsets.only(bottom: 24),
                       padding: const EdgeInsets.all(18),
@@ -197,17 +191,10 @@ class _NewItemScreenState extends State<NewItemScreen> {
                             ],
                           ),
                           const Spacer(),
-
-                          // 🔹 Calendar icon cue
                           IconButton(
-                            icon: const Icon(
-                              Icons.calendar_month,
-                              color: Colors.black54,
-                            ),
+                            icon: const Icon(Icons.calendar_month),
                             onPressed: pickDate,
                           ),
-
-                          // 🔹 Emoji picker
                           GestureDetector(
                             onTap: showEmojiPicker,
                             child: Text(
@@ -219,13 +206,9 @@ class _NewItemScreenState extends State<NewItemScreen> {
                       ),
                     ),
 
-                    // ========== TITLE ==========
+                    // TITLE
                     TextField(
                       controller: titleController,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                      ),
                       decoration: const InputDecoration(
                         hintText: "Title of the day...",
                         border: InputBorder.none,
@@ -234,31 +217,19 @@ class _NewItemScreenState extends State<NewItemScreen> {
 
                     const SizedBox(height: 10),
 
-                    // ========== CONTENT ==========
+                    // DESCRIPTION
                     TextField(
                       controller: descriptionController,
                       maxLines: null,
-                      keyboardType: TextInputType.multiline,
-                      style: const TextStyle(fontSize: 16, height: 1.6),
                       decoration: const InputDecoration(
-                        hintText:
-                            "Write your thoughts here\nThis is your safe space 💗",
+                        hintText: "Write your thoughts here...",
                         border: InputBorder.none,
                       ),
                     ),
 
                     const SizedBox(height: 30),
 
-                    // ========== IMAGE ==========
-                    const Text(
-                      "Memory Photo",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-
+                    // IMAGE
                     GestureDetector(
                       onTap: selectCameraGalleryDialog,
                       child: Container(
@@ -273,10 +244,9 @@ class _NewItemScreenState extends State<NewItemScreen> {
                             ? Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: const [
-                                  Icon(Icons.camera_alt_rounded,
-                                      size: 36, color: Colors.black54),
+                                  Icon(Icons.camera_alt_rounded),
                                   SizedBox(height: 10),
-                                  Text("Tap to add a memory photo"),
+                                  Text("Tap to add photo"),
                                 ],
                               )
                             : ClipRRect(
@@ -284,7 +254,6 @@ class _NewItemScreenState extends State<NewItemScreen> {
                                 child: Image.file(
                                   image!,
                                   fit: BoxFit.cover,
-                                  width: double.infinity,
                                 ),
                               ),
                       ),
@@ -301,13 +270,99 @@ class _NewItemScreenState extends State<NewItemScreen> {
     );
   }
 
+  // ================= CONFIRM SAVE / UPDATE =================
+  void showConfirmDialog() {
+    if (titleController.text.trim().isEmpty ||
+        descriptionController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Title and content cannot be empty")),
+      );
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(
+            editDiary == null ? "Save Diary?" : "Update Diary?",
+          ),
+          content: Text(
+            editDiary == null
+                ? "Do you want to save this diary entry?"
+                : "Do you want to update this diary entry?",
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                saveItem();
+              },
+              child: const Text("Confirm"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // ================= SAVE =================
+  Future<void> saveItem() async {
+    Directory dir = await getApplicationDocumentsDirectory();
+    String imagePath = editDiary?.imagename ?? "NA";
+
+    if (image != null) {
+      String name = "${DateTime.now().millisecondsSinceEpoch}.png";
+      imagePath = "${dir.path}/$name";
+      await image!.copy(imagePath);
+    }
+
+    final String finalTitle =
+        "$selectedEmoji ${titleController.text.trim()}";
+
+    if (editDiary == null) {
+      await DatabaseHelper().insertMyList(
+        DiaryListData(
+          0,
+          finalTitle,
+          descriptionController.text.trim(),
+          "Pending",
+          formatter.format(selectedDate),
+          imagePath,
+        ),
+      );
+    } else {
+      editDiary!.title = finalTitle;
+      editDiary!.description = descriptionController.text.trim();
+      editDiary!.date = formatter.format(selectedDate);
+      editDiary!.imagename = imagePath;
+      await DatabaseHelper().updateMyList(editDiary!);
+    }
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            editDiary == null
+                ? "Diary saved successfully"
+                : "Diary updated successfully",
+          ),
+        ),
+      );
+      Navigator.pop(context);
+    }
+  }
+
   // ================= IMAGE PICKER =================
   void selectCameraGalleryDialog() {
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
       builder: (context) {
         return Padding(
           padding: const EdgeInsets.all(24),
@@ -357,80 +412,9 @@ class _NewItemScreenState extends State<NewItemScreen> {
       aspectRatio: const CropAspectRatio(ratioX: 5, ratioY: 3),
     );
     if (cropped != null) {
-      setState(() => image = File(cropped.path));
-    }
-  }
-
-  // ================= CONFIRM SAVE =================
-  void showConfirmDialog() {
-    if (titleController.text.trim().isEmpty ||
-        descriptionController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Title and content cannot be empty.")),
-      );
-      return;
-    }
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Save Diary"),
-        content: const Text("Save this diary entry?"),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel"),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              saveItem();
-            },
-            child: const Text("Confirm"),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ================= SAVE =================
-  Future<void> saveItem() async {
-    Directory dir = await getApplicationDocumentsDirectory();
-    String imagePath = editDiary?.imagename ?? "NA";
-
-    if (image != null) {
-      String name = "${DateTime.now().millisecondsSinceEpoch}.png";
-      imagePath = "${dir.path}/$name";
-      await image!.copy(imagePath);
-    }
-
-    final String finalTitle =
-        "$selectedEmoji ${titleController.text.trim()}";
-
-    if (editDiary == null) {
-      await DatabaseHelper().insertMyList(
-        DiaryListData(
-          0,
-          finalTitle,
-          descriptionController.text.trim(),
-          "Pending",
-          formatter.format(selectedDate),
-          imagePath,
-        ),
-      );
-    } else {
-      editDiary!.title = finalTitle;
-      editDiary!.description = descriptionController.text.trim();
-      editDiary!.date = formatter.format(selectedDate);
-      editDiary!.imagename = imagePath;
-      await DatabaseHelper().updateMyList(editDiary!);
-    }
-
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Diary saved 💗")),
-      );
-      Navigator.pop(context);
+      setState(() {
+        image = File(cropped.path);
+      });
     }
   }
 }
