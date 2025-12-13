@@ -58,7 +58,7 @@ class _MainScreenState extends State<MainScreen> {
         child: Column(
           children: [
 
-            // HEADER (unchanged)
+            // HEADER (not changed)
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 60, 20, 20),
               child: Column(
@@ -151,7 +151,7 @@ class _MainScreenState extends State<MainScreen> {
                       itemBuilder: (context, index) {
                         final item = diarList[index];
 
-                        // ✅ TAP LIST TO OPEN & UPDATE
+                        // TAP LIST TO OPEN & UPDATE
                         return GestureDetector(
                           onTap: () async {
                             await Navigator.push(
@@ -242,8 +242,6 @@ class _MainScreenState extends State<MainScreen> {
                                                   ),
                                                   const Spacer(),
 
-                                                  // ❌ EDIT ICON REMOVED
-
                                                   IconButton(
                                                     icon: const Icon(
                                                       Icons.delete,
@@ -303,7 +301,7 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  // EMPTY STATE (unchanged)
+  // EMPTY STATE (not changed)
   Widget _emptyState() {
     return Center(
       child: Column(

@@ -14,9 +14,7 @@ class DatabaseHelper {
 
   static Database? _db;
 
-  // -------------------------------------------------
   // DATABASE INITIALIZATION
-  // -------------------------------------------------
   Future<Database> get database async {
     if (_db != null) return _db!;
     _db = await _initDb();
@@ -45,9 +43,7 @@ class DatabaseHelper {
     );
   }
 
-  // -------------------------------------------------
-  // INSERT
-  // -------------------------------------------------
+  // INSERT DATA DIARY
   Future<int> insertMyList(DiaryListData mylist) async {
     final db = await database;
     final data = mylist.toMap();
@@ -55,7 +51,6 @@ class DatabaseHelper {
     return await db.insert(tablename, data);
   }
 
-  // -------------------------------------------------
   // READ (PAGINATION)
   // -------------------------------------------------
   Future<List<DiaryListData>> getMyListsPaginated(

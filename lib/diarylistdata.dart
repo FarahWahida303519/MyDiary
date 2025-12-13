@@ -1,4 +1,5 @@
 class DiaryListData {
+  //Attributes
   int id;
   String title;
   String description;
@@ -6,7 +7,8 @@ class DiaryListData {
   String date;
   String imagename;
 
-  DiaryListData(
+  DiaryListData(  // Constructor to initialize attributes
+
     this.id,
     this.title,
     this.description,
@@ -15,6 +17,7 @@ class DiaryListData {
     this.imagename,
   );
 
+  // Convert DiaryListData object into Map
   Map<String, dynamic> toMap() {
     return {
       'id': id,

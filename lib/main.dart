@@ -89,7 +89,7 @@ class _SplashScreenState extends State<SplashScreen>
             ),
           ),
 
-          // Blur glow overlay
+          // Blur glow 
           Positioned.fill(
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
