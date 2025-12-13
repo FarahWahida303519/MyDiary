@@ -18,7 +18,6 @@ class _MainScreenState extends State<MainScreen> {
   int limit = 5;
   String status = "Loading...";
 
-  // TO SEARCH STATE
   bool isSearching = false;
   String lastSearchKeyword = "";
 
@@ -59,7 +58,7 @@ class _MainScreenState extends State<MainScreen> {
         child: Column(
           children: [
 
-            //THE HEADER
+            // HEADER (unchanged)
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 60, 20, 20),
               child: Column(
@@ -83,7 +82,7 @@ class _MainScreenState extends State<MainScreen> {
                   ),
                   const SizedBox(height: 18),
 
-                  // SEARCH BAR 
+                  // SEARCH BAR
                   GestureDetector(
                     onTap: showSearchDialog,
                     child: Container(
@@ -118,7 +117,6 @@ class _MainScreenState extends State<MainScreen> {
                     ),
                   ),
 
-                  // go back to menu
                   if (isSearching)
                     Padding(
                       padding: const EdgeInsets.only(top: 8),
@@ -143,7 +141,7 @@ class _MainScreenState extends State<MainScreen> {
               ),
             ),
 
-            // List
+            // LIST
             Expanded(
               child: diarList.isEmpty
                   ? _emptyState()
@@ -153,143 +151,147 @@ class _MainScreenState extends State<MainScreen> {
                       itemBuilder: (context, index) {
                         final item = diarList[index];
 
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 16),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.95),
-                            borderRadius: BorderRadius.circular(22),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
-                                blurRadius: 12,
-                                offset: const Offset(0, 6),
+                        // ✅ TAP LIST TO OPEN & UPDATE
+                        return GestureDetector(
+                          onTap: () async {
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const NewItemScreen(),
+                                settings:
+                                    RouteSettings(arguments: item),
                               ),
-                            ],
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 6,
-                                height: 120,
-                                decoration: const BoxDecoration(
-                                  color: Color(0xFFE06092),
-                                  borderRadius: BorderRadius.horizontal(
-                                    left: Radius.circular(22),
+                            );
+                            loadData();
+                          },
+                          child: Container(
+                            margin: const EdgeInsets.only(bottom: 16),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.95),
+                              borderRadius: BorderRadius.circular(22),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.05),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 6),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 6,
+                                  height: 120,
+                                  decoration: const BoxDecoration(
+                                    color: Color(0xFFE06092),
+                                    borderRadius: BorderRadius.horizontal(
+                                      left: Radius.circular(22),
+                                    ),
                                   ),
                                 ),
-                              ),
 
-                              Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(14),
-                                  child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.circular(14),
-                                        child: SizedBox(
-                                          width: 70,
-                                          height: 70,
-                                          child: _loadImage(item.imagename),
+                                Expanded(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(14),
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(14),
+                                          child: SizedBox(
+                                            width: 70,
+                                            height: 70,
+                                            child:
+                                                _loadImage(item.imagename),
+                                          ),
                                         ),
-                                      ),
 
-                                      const SizedBox(width: 12),
+                                        const SizedBox(width: 12),
 
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Row(
-                                              children: [
-                                                Container(
-                                                  padding:
-                                                      const EdgeInsets.symmetric(
-                                                    horizontal: 10,
-                                                    vertical: 4,
-                                                  ),
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.pink.shade50,
-                                                    borderRadius:
-                                                        BorderRadius.circular(20),
-                                                  ),
-                                                  child: Text(
-                                                    item.date,
-                                                    style: const TextStyle(
-                                                      fontSize: 12,
-                                                      fontWeight:
-                                                          FontWeight.w600,
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  Container(
+                                                    padding:
+                                                        const EdgeInsets.symmetric(
+                                                      horizontal: 10,
+                                                      vertical: 4,
+                                                    ),
+                                                    decoration: BoxDecoration(
                                                       color:
-                                                          Color(0xFFB03A75),
+                                                          Colors.pink.shade50,
+                                                      borderRadius:
+                                                          BorderRadius.circular(20),
+                                                    ),
+                                                    child: Text(
+                                                      item.date,
+                                                      style: const TextStyle(
+                                                        fontSize: 12,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        color:
+                                                            Color(0xFFB03A75),
+                                                      ),
                                                     ),
                                                   ),
-                                                ),
-                                                const Spacer(),
-                                                IconButton(
-                                                  icon: const Icon(
-                                                    Icons.edit,
-                                                    size: 18,
-                                                    color: Color(0xFFB03A75),
+                                                  const Spacer(),
+
+                                                  // ❌ EDIT ICON REMOVED
+
+                                                  IconButton(
+                                                    icon: const Icon(
+                                                      Icons.delete,
+                                                      size: 18,
+                                                      color: Colors.red,
+                                                    ),
+                                                    onPressed: () =>
+                                                        deleteDialog(item.id),
                                                   ),
-                                                  onPressed: () async {
-                                                    await Navigator.push(
-                                                      context,
-                                                      MaterialPageRoute(
-                                                        builder: (_) =>
-                                                            const NewItemScreen(),
-                                                        settings:
-                                                            RouteSettings(
-                                                                arguments: item),
-                                                      ),
-                                                    );
-                                                    loadData();
-                                                  },
-                                                ),
-                                                IconButton(
-                                                  icon: const Icon(
-                                                    Icons.delete,
-                                                    size: 18,
-                                                    color: Colors.red,
-                                                  ),
-                                                  onPressed: () =>
-                                                      deleteDialog(item.id),
-                                                ),
-                                              ],
-                                            ),
-
-                                            const SizedBox(height: 6),
-
-                                            Text(
-                                              item.title,
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: const TextStyle(
-                                                fontSize: 17,
-                                                fontWeight: FontWeight.bold,
+                                                ],
                                               ),
-                                            ),
 
-                                            const SizedBox(height: 4),
+                                              const SizedBox(height: 6),
 
-                                            Text(
-                                              item.description,
-                                              maxLines: 2,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                color: Colors.black
-                                                    .withOpacity(0.6),
+                                              Text(
+                                                item.title,
+                                                maxLines: 1,
+                                                overflow:
+                                                    TextOverflow.ellipsis,
+                                                style: const TextStyle(
+                                                  fontSize: 17,
+                                                  fontWeight:
+                                                      FontWeight.bold,
+                                                ),
                                               ),
-                                            ),
-                                          ],
+
+                                              const SizedBox(height: 4),
+
+                                              Text(
+                                                item.description,
+                                                maxLines: 2,
+                                                overflow:
+                                                    TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  color: Colors.black
+                                                      .withOpacity(0.6),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         );
                       },
@@ -301,7 +303,7 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  // IF NOT FOUND DIARY IN THE LIST/DB
+  // EMPTY STATE (unchanged)
   Widget _emptyState() {
     return Center(
       child: Column(
@@ -330,7 +332,7 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  // SET THE IMAGE
+  // IMAGE 
   Widget _loadImage(String imagename) {
     if (imagename == "NA") {
       return Container(
@@ -345,7 +347,7 @@ class _MainScreenState extends State<MainScreen> {
         : const Icon(Icons.broken_image);
   }
 
-  // LOAD THE DATA
+  // LOAD DATA 
   Future<void> loadData() async {
     setState(() {
       status = "Loading...";
@@ -359,7 +361,7 @@ class _MainScreenState extends State<MainScreen> {
     setState(() {});
   }
 
-  // DELETE THE DIARY FROM LIST AND DB
+  // DELETE 
   void deleteDialog(int id) {
     showDialog(
       context: context,
@@ -385,7 +387,7 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  //SEARCH THE DIARY
+  // SEARCH 
   void showSearchDialog() {
     TextEditingController searchController = TextEditingController();
 
@@ -407,6 +409,15 @@ class _MainScreenState extends State<MainScreen> {
           ElevatedButton(
             onPressed: () async {
               final keyword = searchController.text.trim();
+
+              if (keyword.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("Please enter a keyword to search"),
+                  ),
+                );
+                return;
+              }
 
               diarList =
                   await DatabaseHelper().searchMyList(keyword);
