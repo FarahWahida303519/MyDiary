@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:mydiary/databasehelper.dart';
 import 'package:mydiary/diarylistdata.dart';
-import 'package:mydiary/newitemscreen.dart';
+import 'package:mydiary/diary_page.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -13,10 +13,13 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   List<DiaryListData> diarList = [];
+
   int curpageno = 1;
   int limit = 5;
   int pages = 1;
+
   String status = "Loading...";
+  bool isSearching = false; // ⭐ important flag
 
   @override
   void initState() {
@@ -27,272 +30,316 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFCE9F3),
-
-      // ================= FLOATING BUTTON =================
       floatingActionButton: FloatingActionButton(
         backgroundColor: const Color(0xFFE06092),
         elevation: 6,
         onPressed: () async {
           await Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => const NewItemScreen(),
-            ),
+            MaterialPageRoute(builder: (_) => const NewItemScreen()),
           );
           loadData();
         },
         child: const Icon(Icons.add, color: Colors.white),
       ),
 
-      body: Column(
-        children: [
-          // ================= HEADER =================
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 60, 20, 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "My Diary 📔",
-                  style: TextStyle(
-                    fontSize: 30,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  "A safe place for your memories",
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey.shade700,
-                  ),
-                ),
-                const SizedBox(height: 18),
-
-                // ================= SEARCH BAR =================
-                GestureDetector(
-                  onTap: showSearchDialog,
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 14,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.06),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: const [
-                        Icon(Icons.search, color: Colors.grey),
-                        SizedBox(width: 10),
-                        Text(
-                          "Search your diary...",
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color(0xFFFCE1F3),
+              Color(0xFFD2E4FF),
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
+        ),
 
-          // ================= LIST =================
-          Expanded(
-            child: diarList.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.menu_book_rounded,
-                          size: 90,
-                          color: Colors.pink.shade200,
-                        ),
-                        const SizedBox(height: 20),
-                        Text(
-                          status,
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          "Tap + to start writing 💗",
-                          style: TextStyle(
-                            color: Colors.grey.shade600,
-                          ),
-                        ),
-                      ],
+        child: Column(
+          children: [
+            // ================= HEADER =================
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 60, 20, 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "My Diary 📔",
+                    style: TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFFB03A75),
                     ),
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: diarList.length,
-                    itemBuilder: (context, index) {
-                      final item = diarList[index];
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    "A safe place for your memories",
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.black.withOpacity(0.55),
+                    ),
+                  ),
+                  const SizedBox(height: 18),
 
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(22),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 12,
-                              offset: const Offset(0, 6),
+                  // ================= SEARCH BAR =================
+                  GestureDetector(
+                    onTap: showSearchDialog,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.9),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.06),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: const [
+                          Icon(Icons.search, color: Colors.grey),
+                          SizedBox(width: 10),
+                          Text(
+                            "Search your diary...",
+                            style: TextStyle(
+                              color: Colors.grey,
+                              fontSize: 15,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // ================= BACK TO LIST =================
+                  if (isSearching)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: GestureDetector(
+                        onTap: () async {
+                          isSearching = false;
+                          await loadData();
+                        },
+                        child: Row(
+                          children: const [
+                            Icon(
+                              Icons.arrow_back,
+                              size: 18,
+                              color: Color(0xFFB03A75),
+                            ),
+                            SizedBox(width: 6),
+                            Text(
+                              "Back to all entries",
+                              style: TextStyle(
+                                color: Color(0xFFB03A75),
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ],
                         ),
-                        child: Row(
-                          children: [
-                            // ===== LEFT ACCENT =====
-                            Container(
-                              width: 6,
-                              height: 120,
-                              decoration: BoxDecoration(
-                                color: Colors.pink.shade300,
-                                borderRadius: const BorderRadius.horizontal(
-                                  left: Radius.circular(22),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+
+            // ================= LIST =================
+            Expanded(
+              child: diarList.isEmpty
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.menu_book_rounded,
+                            size: 90,
+                            color: Colors.pink.shade200,
+                          ),
+                          const SizedBox(height: 20),
+                          Text(
+                            status,
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFFB03A75),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            "Tap + to start writing 💗",
+                            style: TextStyle(
+                              color: Colors.black.withOpacity(0.5),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      itemCount: diarList.length,
+                      itemBuilder: (context, index) {
+                        final item = diarList[index];
+
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 16),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.95),
+                            borderRadius: BorderRadius.circular(22),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 12,
+                                offset: const Offset(0, 6),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 6,
+                                height: 120,
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFFE06092),
+                                  borderRadius: BorderRadius.horizontal(
+                                    left: Radius.circular(22),
+                                  ),
                                 ),
                               ),
-                            ),
 
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.all(14),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    // ===== IMAGE (OLD STYLE) =====
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(14),
-                                      child: SizedBox(
-                                        width: 70,
-                                        height: 70,
-                                        child: _loadImage(item.imagename),
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(14),
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      ClipRRect(
+                                        borderRadius:
+                                            BorderRadius.circular(14),
+                                        child: SizedBox(
+                                          width: 70,
+                                          height: 70,
+                                          child:
+                                              _loadImage(item.imagename),
+                                        ),
                                       ),
-                                    ),
 
-                                    const SizedBox(width: 12),
+                                      const SizedBox(width: 12),
 
-                                    // ===== TEXT =====
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          // DATE + ACTIONS
-                                          Row(
-                                            children: [
-                                              Container(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                  horizontal: 10,
-                                                  vertical: 4,
-                                                ),
-                                                decoration: BoxDecoration(
-                                                  color:
-                                                      Colors.pink.shade50,
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          20),
-                                                ),
-                                                child: Text(
-                                                  item.date,
-                                                  style: TextStyle(
-                                                    fontSize: 12,
-                                                    fontWeight:
-                                                        FontWeight.w600,
-                                                    color: Colors
-                                                        .pink.shade700,
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Container(
+                                                  padding:
+                                                      const EdgeInsets.symmetric(
+                                                    horizontal: 10,
+                                                    vertical: 4,
+                                                  ),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.pink.shade50,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            20),
+                                                  ),
+                                                  child: Text(
+                                                    item.date,
+                                                    style: const TextStyle(
+                                                      fontSize: 12,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      color:
+                                                          Color(0xFFB03A75),
+                                                    ),
                                                   ),
                                                 ),
-                                              ),
-                                              const Spacer(),
-                                              IconButton(
-                                                icon: const Icon(
-                                                  Icons.edit,
-                                                  size: 18,
+                                                const Spacer(),
+                                                IconButton(
+                                                  icon: const Icon(
+                                                    Icons.edit,
+                                                    size: 18,
+                                                    color:
+                                                        Color(0xFFB03A75),
+                                                  ),
+                                                  onPressed: () async {
+                                                    await Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                        builder: (_) =>
+                                                            const NewItemScreen(),
+                                                        settings:
+                                                            RouteSettings(
+                                                                arguments:
+                                                                    item),
+                                                      ),
+                                                    );
+                                                    loadData();
+                                                  },
                                                 ),
-                                                onPressed: () async {
-                                                  await Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                      builder: (context) =>
-                                                          const NewItemScreen(),
-                                                      settings:
-                                                          RouteSettings(
-                                                              arguments:
-                                                                  item),
-                                                    ),
-                                                  );
-                                                  loadData();
-                                                },
-                                              ),
-                                              IconButton(
-                                                icon: const Icon(
-                                                  Icons.delete,
-                                                  size: 18,
-                                                  color: Colors.red,
+                                                IconButton(
+                                                  icon: const Icon(
+                                                    Icons.delete,
+                                                    size: 18,
+                                                    color: Colors.red,
+                                                  ),
+                                                  onPressed: () =>
+                                                      deleteDialog(item.id),
                                                 ),
-                                                onPressed: () =>
-                                                    deleteDialog(item.id),
+                                              ],
+                                            ),
+
+                                            const SizedBox(height: 6),
+
+                                            Text(
+                                              item.title,
+                                              maxLines: 1,
+                                              overflow:
+                                                  TextOverflow.ellipsis,
+                                              style: const TextStyle(
+                                                fontSize: 17,
+                                                fontWeight:
+                                                    FontWeight.bold,
                                               ),
-                                            ],
-                                          ),
-
-                                          const SizedBox(height: 6),
-
-                                          Text(
-                                            item.title,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                              fontSize: 17,
-                                              fontWeight: FontWeight.bold,
                                             ),
-                                          ),
 
-                                          const SizedBox(height: 4),
+                                            const SizedBox(height: 4),
 
-                                          Text(
-                                            item.description.isEmpty
-                                                ? "No description"
-                                                : item.description,
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              color:
-                                                  Colors.grey.shade700,
+                                            Text(
+                                              item.description.isEmpty
+                                                  ? "No description"
+                                                  : item.description,
+                                              maxLines: 2,
+                                              overflow:
+                                                  TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                color: Colors.black
+                                                    .withOpacity(0.6),
+                                              ),
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-          ),
-        ],
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -319,6 +366,7 @@ class _MainScreenState extends State<MainScreen> {
 
   // ================= LOAD DATA =================
   Future<void> loadData() async {
+    isSearching = false;
     diarList = await DatabaseHelper()
         .getMyListsPaginated(limit, (curpageno - 1) * limit);
     setState(() {});
@@ -375,6 +423,7 @@ class _MainScreenState extends State<MainScreen> {
             onPressed: () async {
               diarList = await DatabaseHelper()
                   .searchMyList(searchController.text.trim());
+              isSearching = true;
               setState(() {});
               Navigator.pop(context);
             },
