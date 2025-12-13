@@ -60,7 +60,7 @@ class _NewItemScreenState extends State<NewItemScreen> {
       context: context,
       initialDate: selectedDate,
       firstDate: DateTime(2000),
-      lastDate: DateTime.now(),
+      lastDate: DateTime(2090), 
     );
 
     if (picked != null) {
