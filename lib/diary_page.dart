@@ -7,14 +7,14 @@ import 'package:mydiary/databasehelper.dart';
 import 'package:mydiary/diarylistdata.dart';
 import 'package:path_provider/path_provider.dart';
 
-class NewItemScreen extends StatefulWidget {
-  const NewItemScreen({super.key});
+class DiaryPage extends StatefulWidget {
+  const DiaryPage({super.key});
 
   @override
-  State<NewItemScreen> createState() => _NewItemScreenState();
+  State<DiaryPage> createState() => _DiaryPage();
 }
 
-class _NewItemScreenState extends State<NewItemScreen> {
+class _DiaryPage extends State<DiaryPage> {
   File? image;
   DiaryListData? editDiary;
 

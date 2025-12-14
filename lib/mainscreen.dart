@@ -12,31 +12,35 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
+  //store data retrieve from db
   List<DiaryListData> diarList = [];
 
+//pagination
   int curpageno = 1;
   int limit = 5;
   String status = "Loading...";
 
   bool isSearching = false;
-  String lastSearchKeyword = "";
+  String lastSearchKeyword = "";//store last search keyword
 
   @override
   void initState() {
     super.initState();
-    loadData();
+    loadData();//to load data 
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      //button to add new diary
       floatingActionButton: FloatingActionButton(
         backgroundColor: const Color(0xFFE06092),
         elevation: 6,
+        //navigate to 
         onPressed: () async {
           await Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const NewItemScreen()),
+            MaterialPageRoute(builder: (_) => const DiaryPage()),
           );
           loadData();
         },
@@ -157,7 +161,7 @@ class _MainScreenState extends State<MainScreen> {
                             await Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => const NewItemScreen(),
+                                builder: (_) => const DiaryPage(),
                                 settings:
                                     RouteSettings(arguments: item),
                               ),
