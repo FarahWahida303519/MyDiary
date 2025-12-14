@@ -7,8 +7,8 @@ class DiaryListData {
   String date;
   String imagename;
 
-  DiaryListData(  // Constructor to initialize attributes
-
+  DiaryListData(
+    // Constructor to initialize attributes
     this.id,
     this.title,
     this.description,
@@ -29,6 +29,7 @@ class DiaryListData {
     };
   }
 
+  //to create DiaryListData obj from map to read data from db
   factory DiaryListData.fromMap(Map<String, dynamic> map) {
     return DiaryListData(
       map['id'] as int,

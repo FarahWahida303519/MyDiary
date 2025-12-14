@@ -13,14 +13,15 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: "MyDiary",
-      debugShowCheckedModeBanner: false,
+      title: "MyDiary", //title app
+      debugShowCheckedModeBanner: false, //hide the debug banner
+      //theme app
       theme: ThemeData(
         useMaterial3: true,
         fontFamily: "Arial",
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFF0A8D0)),
       ),
-      home: const SplashScreen(),
+      home: const SplashScreen(), //set the screen will run first when app start
     );
   }
 }
@@ -34,24 +35,28 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _fadeAnimation;
+  late AnimationController _controller; //controller animation
+  late Animation<double> _fadeAnimation; //fade in animation
 
   @override
   void initState() {
     super.initState();
 
+    //initialize animation controller
     _controller = AnimationController(
       duration: const Duration(seconds: 2),
       vsync: this,
     );
 
-    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    //fade animation
+    _fadeAnimation = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
 
-    _controller.forward();
+    _controller.forward(); //start animation
 
+    //set the duration before go to next page
     Future.delayed(const Duration(seconds: 5), () {
       if (mounted) {
         Navigator.pushReplacement(
@@ -89,7 +94,7 @@ class _SplashScreenState extends State<SplashScreen>
             ),
           ),
 
-          // Blur glow 
+          // Blur glow
           Positioned.fill(
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
@@ -167,10 +172,7 @@ class _SplashScreenState extends State<SplashScreen>
   }
 }
 
-// ----------------------------------------------------------------------
-//  ASK PASSWORD SCREEN WITH SAME PINK → BLUE GRADIENT
-// ----------------------------------------------------------------------
-
+//ask password screen
 class AskPasswordScreen extends StatelessWidget {
   const AskPasswordScreen({super.key});
 
@@ -241,13 +243,16 @@ class AskPasswordScreen extends StatelessWidget {
                           backgroundColor: const Color(0xFFB03A75),
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 25, vertical: 12),
+                            horizontal: 25,
+                            vertical: 12,
+                          ),
                         ),
                         onPressed: () {
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                                builder: (_) => const RegisterScreen()),
+                              builder: (_) => const RegisterScreen(),
+                            ),
                           );
                         },
                         child: const Text("YES"),
@@ -261,13 +266,16 @@ class AskPasswordScreen extends StatelessWidget {
                           foregroundColor: const Color(0xFFB03A75),
                           side: const BorderSide(color: Color(0xFFB03A75)),
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 25, vertical: 12),
+                            horizontal: 25,
+                            vertical: 12,
+                          ),
                         ),
                         onPressed: () {
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                                builder: (_) => const MainScreen()),
+                              builder: (_) => const MainScreen(),
+                            ),
                           );
                         },
                         child: const Text("NO"),

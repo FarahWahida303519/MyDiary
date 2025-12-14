@@ -15,29 +15,49 @@ class DiaryPage extends StatefulWidget {
 }
 
 class _DiaryPage extends State<DiaryPage> {
+  //stored the selected img file
   File? image;
+  //to store data when edit
   DiaryListData? editDiary;
 
+  //date  picker
   DateTime selectedDate = DateTime.now();
-  String selectedEmoji = "🙂";
+  String selectedEmoji = "🙂"; //selected emoji for title
 
+  //controller for input
   final TextEditingController titleController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
-  final DateFormat formatter = DateFormat('dd MMM yyyy');
+  final DateFormat formatter = DateFormat('dd MMM yyyy'); //format the date
 
+  //emoji picker list
   final List<String> emojiList = [
-    "😀","😊","🥰","😍","😎","😢","😭","😡",
-    "😴","🤔","😇","🥳","😌","😔","😤"
+    "😀",
+    "😊",
+    "🥰",
+    "😍",
+    "😎",
+    "😢",
+    "😭",
+    "😡",
+    "😴",
+    "🤔",
+    "😇",
+    "🥳",
+    "😌",
+    "😔",
+    "😤",
   ];
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
+    //get data from previous page
     final args = ModalRoute.of(context)?.settings.arguments;
+    //if edit & data exist
     if (args != null && args is DiaryListData && editDiary == null) {
       editDiary = args;
-
+      //Check if title start with emoji
       if (args.title.isNotEmpty && emojiList.contains(args.title[0])) {
         selectedEmoji = args.title[0];
         titleController.text = args.title.substring(2);
@@ -45,61 +65,19 @@ class _DiaryPage extends State<DiaryPage> {
         titleController.text = args.title;
       }
 
+      //to set content text
       descriptionController.text = args.description;
+
+      //convert string date format to datetime format
       selectedDate = formatter.parse(args.date);
 
+      //load image if exist
       if (args.imagename != "NA") {
         image = File(args.imagename);
       }
     }
   }
 
-  // SET DATE PICKER
-  Future<void> pickDate() async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: selectedDate,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2090), 
-    );
-
-    if (picked != null) {
-      setState(() => selectedDate = picked);
-    }
-  }
-
-  // SET EMOJI PICKER
-  void showEmojiPicker() {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.all(20),
-          child: GridView.count(
-            crossAxisCount: 4,
-            shrinkWrap: true,
-            children: emojiList.map((emoji) {
-              return GestureDetector(
-                onTap: () {
-                  setState(() => selectedEmoji = emoji);
-                  Navigator.pop(context);
-                },
-                child: Center(
-                  child: Text(
-                    emoji,
-                    style: const TextStyle(fontSize: 32),
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
-        );
-      },
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -107,10 +85,7 @@ class _DiaryPage extends State<DiaryPage> {
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [
-              Color(0xFFFCE1F3),
-              Color(0xFFD2E4FF),
-            ],
+            colors: [Color(0xFFFCE1F3), Color(0xFFD2E4FF)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -119,16 +94,22 @@ class _DiaryPage extends State<DiaryPage> {
         child: SafeArea(
           child: Column(
             children: [
-
               // THE HEADER
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+
+                //back btn
                 child: Row(
                   children: [
                     IconButton(
                       icon: const Icon(Icons.arrow_back),
                       onPressed: () => Navigator.pop(context),
                     ),
+
+                    //title text
                     const Spacer(),
                     Text(
                       editDiary == null ? "New Diary" : "Edit Diary",
@@ -138,6 +119,8 @@ class _DiaryPage extends State<DiaryPage> {
                         color: Color(0xFFB03A75),
                       ),
                     ),
+
+                    //save / update btn
                     const Spacer(),
                     TextButton(
                       onPressed: showConfirmDialog,
@@ -161,7 +144,6 @@ class _DiaryPage extends State<DiaryPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-
                       // DATE + EMOJI
                       Container(
                         margin: const EdgeInsets.only(bottom: 24),
@@ -177,6 +159,8 @@ class _DiaryPage extends State<DiaryPage> {
                             ),
                           ],
                         ),
+
+                        //Day num
                         child: Row(
                           children: [
                             Text(
@@ -187,6 +171,8 @@ class _DiaryPage extends State<DiaryPage> {
                               ),
                             ),
                             const SizedBox(width: 14),
+
+                            //day&month
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -206,11 +192,15 @@ class _DiaryPage extends State<DiaryPage> {
                                 ),
                               ],
                             ),
+
+                            //calendar btn
                             const Spacer(),
                             IconButton(
                               icon: const Icon(Icons.calendar_month),
                               onPressed: pickDate,
                             ),
+
+                            //Emojic selector
                             GestureDetector(
                               onTap: showEmojiPicker,
                               child: Text(
@@ -222,7 +212,7 @@ class _DiaryPage extends State<DiaryPage> {
                         ),
                       ),
 
-                      // TITLE
+                      // intput title
                       TextField(
                         controller: titleController,
                         style: const TextStyle(
@@ -237,7 +227,7 @@ class _DiaryPage extends State<DiaryPage> {
 
                       const SizedBox(height: 10),
 
-                      // DESCRIPTION
+                      // content input
                       TextField(
                         controller: descriptionController,
                         maxLines: null,
@@ -250,7 +240,7 @@ class _DiaryPage extends State<DiaryPage> {
 
                       const SizedBox(height: 30),
 
-                      // IMAGE
+                      // img selection area
                       GestureDetector(
                         onTap: selectCameraGalleryDialog,
                         child: Container(
@@ -261,6 +251,8 @@ class _DiaryPage extends State<DiaryPage> {
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(color: Colors.black26),
                           ),
+
+                          //show img / placeholder
                           child: image == null
                               ? Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
@@ -272,10 +264,7 @@ class _DiaryPage extends State<DiaryPage> {
                                 )
                               : ClipRRect(
                                   borderRadius: BorderRadius.circular(20),
-                                  child: Image.file(
-                                    image!,
-                                    fit: BoxFit.cover,
-                                  ),
+                                  child: Image.file(image!, fit: BoxFit.cover),
                                 ),
                         ),
                       ),
@@ -292,6 +281,56 @@ class _DiaryPage extends State<DiaryPage> {
     );
   }
 
+  // SET DATE PICKER
+  Future<void> pickDate() async {
+    //show date dialog
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2090),
+    );
+
+    //updated selected date
+    if (picked != null) {
+      setState(() => selectedDate = picked);
+    }
+  }
+
+  // SET EMOJI PICKER
+  void showEmojiPicker() {
+    showModalBottomSheet(
+      context: context,
+
+      //top corner
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(20),
+
+          //display emoji
+          child: GridView.count(
+            crossAxisCount: 4,
+            shrinkWrap: true,
+            children: emojiList.map((emoji) {
+              return GestureDetector(
+                onTap: () {
+                  setState(() => selectedEmoji = emoji);
+                  Navigator.pop(context);
+                },
+                child: Center(
+                  child: Text(emoji, style: const TextStyle(fontSize: 32)),
+                ),
+              );
+            }).toList(),
+          ),
+        );
+      },
+    );
+  }
+
   //CONFRIMATION TO SAVE OR UPDATE
   void showConfirmDialog() {
     if (titleController.text.trim().isEmpty ||
@@ -302,6 +341,7 @@ class _DiaryPage extends State<DiaryPage> {
       return;
     }
 
+    //dialog confirmation
     showDialog(
       context: context,
       builder: (context) {
@@ -333,20 +373,24 @@ class _DiaryPage extends State<DiaryPage> {
     );
   }
 
-  // SAVE
+  // save record diary to db
   Future<void> saveItem() async {
+    //app directory
     Directory dir = await getApplicationDocumentsDirectory();
+    //default img path
     String imagePath = editDiary?.imagename ?? "NA";
 
+    //save img if selected
     if (image != null) {
       String name = "${DateTime.now().millisecondsSinceEpoch}.png";
       imagePath = "${dir.path}/$name";
       await image!.copy(imagePath);
     }
 
-    final String finalTitle =
-        "$selectedEmoji ${titleController.text.trim()}";
+    //combine title+emoji
+    final String finalTitle = "$selectedEmoji ${titleController.text.trim()}";
 
+    //insert /upddate
     if (editDiary == null) {
       await DatabaseHelper().insertMyList(
         DiaryListData(
@@ -380,7 +424,7 @@ class _DiaryPage extends State<DiaryPage> {
     }
   }
 
-  // SET IMAGE PICKER
+  // choose camera or gallery
   void selectCameraGalleryDialog() {
     showModalBottomSheet(
       context: context,
@@ -414,28 +458,42 @@ class _DiaryPage extends State<DiaryPage> {
     );
   }
 
+  //open camera
   Future<void> openCamera() async {
+    //launch camera use a image_picker
     final picked = await ImagePicker().pickImage(source: ImageSource.camera);
+
+    //check if user take pic or not
     if (picked != null) {
       image = File(picked.path);
-      cropImage();
+      cropImage(); //to crop image method
     }
   }
 
+  //open gallery
   Future<void> openGallery() async {
+    //open gallery use image_picker
     final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
+
+    //check if user selected pic or not
     if (picked != null) {
       image = File(picked.path);
-      cropImage();
+      cropImage(); //crop pic method
     }
   }
 
+  //crop picture
   Future<void> cropImage() async {
+    //open crop interface
     final cropped = await ImageCropper().cropImage(
+      //path img to be crop
       sourcePath: image!.path,
       aspectRatio: const CropAspectRatio(ratioX: 5, ratioY: 3),
     );
+
+    //to update img with crop ver
     if (cropped != null) {
+      //refreshes ui to show new image
       setState(() => image = File(cropped.path));
     }
   }
